@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOATUJJU</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --black: #080808;
+  --card: #111111;
+  --card2: #161616;
+  --border: #242424;
+  --border2: #2e2e2e;
+  --em: #10B981;
+  --em-dim: rgba(16,185,129,0.12);
+  --em-glow: rgba(16,185,129,0.25);
+  --white: #FFFFFF;
+  --text: #E8E8E8;
+  --muted: #888888;
+  --muted2: #555555;
+  --red: #EF4444;
+  --gold: #F59E0B;
+  --blue: #3B82F6;
+  --purple: #8B5CF6;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--text);font-family:'Inter',sans-serif;display:flex;min-height:100vh;overflow-x:hidden;}
+
+/* SIDEBAR */
+#sidebar{
+  width:220px;min-width:220px;height:100vh;position:fixed;top:0;left:0;
+  background:var(--card);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:100;
+  transition:transform 0.3s;
+}
+.sb-logo{
+  padding:1.5rem 1.25rem 1rem;
+  border-bottom:1px solid var(--border);
+}
+.sb-logo-text{
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.1rem;
+  letter-spacing:2px;color:var(--white);
+}
+.sb-logo-sub{font-size:0.65rem;color:var(--em);letter-spacing:1px;margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.sb-nav{flex:1;padding:0.75rem 0;overflow-y:auto;}
+.sb-section{padding:0.5rem 1rem 0.25rem;font-size:0.6rem;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+.sb-item{
+  display:flex;align-items:center;gap:0.65rem;
+  padding:0.5rem 1rem;margin:0.1rem 0.5rem;border-radius:6px;
+  font-size:0.82rem;color:var(--muted);cursor:pointer;
+  transition:all 0.15s;font-weight:500;
+}
+.sb-item:hover{background:var(--card2);color:var(--text);}
+.sb-item.active{background:var(--em-dim);color:var(--em);}
+.sb-item-icon{font-size:0.9rem;width:16px;text-align:center;}
+.sb-goat{
+  margin:0.75rem;padding:0.85rem;
+  background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(16,185,129,0.05));
+  border:1px solid rgba(16,185,129,0.2);border-radius:8px;
+}
+.sb-goat-label{font-size:0.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:4px;}
+.sb-goat-score{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;color:var(--em);line-height:1;}
+.sb-goat-bar{height:3px;background:var(--border);border-radius:99px;margin-top:6px;overflow:hidden;}
+.sb-goat-fill{height:100%;background:var(--em);border-radius:99px;transition:width 1s ease;}
+
+/* MAIN */
+#main{margin-left:220px;flex:1;min-height:100vh;}
+.page{display:none;padding:2rem;max-width:1100px;}
+.page.active{display:block;}
+
+/* PAGE HEADER */
+.ph{margin-bottom:1.75rem;}
+.ph-eyebrow{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--em);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.4rem;}
+.ph-title{font-family:'Space Grotesk',sans-serif;font-size:1.75rem;font-weight:700;color:var(--white);letter-spacing:-0.5px;}
+.ph-sub{font-size:0.82rem;color:var(--muted);margin-top:0.3rem;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;}
+.card:hover{border-color:var(--border2);transition:border-color 0.2s;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+.gap{gap:1rem;}
+
+/* STAT CARD */
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;}
+.stat-label{font-size:0.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.5rem;}
+.stat-val{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;color:var(--white);line-height:1;}
+.stat-sub{font-size:0.72rem;color:var(--muted);margin-top:0.3rem;}
+.stat-delta{font-size:0.72rem;margin-top:0.25rem;}
+.stat-delta.up{color:var(--em);}
+.stat-delta.down{color:var(--red);}
+
+/* GOAL CARD */
+.goal-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;position:relative;overflow:hidden;transition:border-color 0.2s;}
+.goal-card:hover{border-color:var(--border2);}
+.goal-card-stripe{position:absolute;top:0;left:0;width:3px;height:100%;border-radius:10px 0 0 10px;}
+.goal-cat{font-size:0.6rem;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.5rem;}
+.goal-name{font-family:'Space Grotesk',sans-serif;font-size:0.95rem;font-weight:600;color:var(--white);margin-bottom:0.6rem;}
+.goal-nums{display:flex;justify-content:space-between;margin-bottom:0.75rem;}
+.goal-current-block{}
+.goal-current-lbl{font-size:0.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:1px;}
+.goal-current-val{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:var(--white);}
+.goal-target-block{text-align:right;}
+.goal-target-lbl{font-size:0.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:1px;}
+.goal-target-val{font-family:'Space Grotesk',sans-serif;font-size:0.9rem;font-weight:600;}
+.bar-wrap{background:var(--border);border-radius:99px;height:5px;overflow:hidden;margin-bottom:0.4rem;}
+.bar-fill{height:100%;border-radius:99px;transition:width 1.2s cubic-bezier(.16,1,.3,1);}
+.bar-pct{font-size:0.65rem;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:right;}
+.goal-deadline{font-size:0.68rem;color:var(--muted);margin-top:0.5rem;}
+
+/* SECTION DIVIDER */
+.sdiv{display:flex;align-items:center;gap:0.75rem;margin:1.5rem 0 1rem;}
+.sdiv-label{font-size:0.65rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+.sdiv-line{flex:1;height:1px;background:var(--border);}
+
+/* COUNTDOWN CARDS */
+.countdown-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center;}
+.cc-label{font-size:0.65rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.75rem;}
+.cc-num{font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:700;color:var(--white);line-height:1;margin-bottom:0.25rem;}
+.cc-unit{font-size:0.65rem;color:var(--em);font-family:'JetBrains Mono',monospace;letter-spacing:2px;}
+.cc-event{font-size:0.75rem;color:var(--muted);margin-top:0.4rem;}
+
+/* PROGRESS BAR TALL */
+.prog-tall{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+.prog-tall-fill{height:100%;border-radius:99px;background:var(--em);}
+
+/* CHART SECTION */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.chart-title{font-family:'Space Grotesk',sans-serif;font-size:0.9rem;font-weight:600;color:var(--white);}
+.chart-btn{background:var(--em-dim);border:1px solid rgba(16,185,129,0.3);color:var(--em);font-family:'JetBrains Mono',monospace;font-size:0.65rem;padding:0.3rem 0.7rem;border-radius:5px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
+.chart-btn:hover{background:rgba(16,185,129,0.2);}
+
+/* TABS */
+.tabs{display:flex;gap:0.25rem;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:3px;margin-bottom:1.25rem;width:fit-content;}
+.tab-btn{background:none;border:none;color:var(--muted);font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:500;padding:0.4rem 0.85rem;border-radius:5px;cursor:pointer;transition:all 0.15s;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{background:var(--card2);color:var(--white);}
+
+/* CHECKLIST */
+.cl-item{display:flex;align-items:flex-start;gap:0.65rem;padding:0.55rem 0;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity 0.15s;}
+.cl-item:last-child{border-bottom:none;}
+.cl-box{width:16px;height:16px;border:1.5px solid var(--border2);border-radius:4px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.cl-item.done .cl-box{background:var(--em);border-color:var(--em);}
+.cl-item.done .cl-box::after{content:'✓';color:#000;font-size:10px;font-weight:700;}
+.cl-item.done .cl-text{color:var(--muted2);text-decoration:line-through;}
+.cl-text{font-size:0.83rem;color:var(--text);line-height:1.4;}
+
+/* HABIT TRACKER */
+.habit-grid{display:flex;flex-direction:column;gap:1.25rem;}
+.habit-row{display:flex;align-items:center;gap:1rem;}
+.habit-name{font-size:0.8rem;font-weight:500;color:var(--text);width:100px;flex-shrink:0;}
+.habit-streak-bar{flex:1;display:flex;gap:2px;flex-wrap:wrap;}
+.habit-dot{width:12px;height:12px;border-radius:2px;background:var(--border);flex-shrink:0;cursor:pointer;transition:background 0.1s;}
+.habit-dot.done{background:var(--em);}
+.habit-dot.miss{background:var(--red);}
+.habit-count{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--em);width:40px;text-align:right;flex-shrink:0;}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:1.5rem;}
+.timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1.5px;background:var(--border);}
+.tl-item{position:relative;margin-bottom:1.25rem;}
+.tl-dot{position:absolute;left:-1.3rem;top:4px;width:11px;height:11px;border-radius:50%;border:2px solid var(--em);background:var(--black);}
+.tl-dot.done{background:var(--em);}
+.tl-dot.current{background:var(--em);box-shadow:0 0 8px var(--em-glow);}
+.tl-year{font-size:0.65rem;color:var(--em);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:2px;}
+.tl-event{font-size:0.85rem;color:var(--text);}
+.tl-sub{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+
+/* TIMETABLE */
+.tt-row{display:grid;grid-template-columns:80px 1fr auto;border-bottom:1px solid var(--border);align-items:center;}
+.tt-row:last-child{border-bottom:none;}
+.tt-time{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--em);padding:0.8rem 0;}
+.tt-task{font-size:0.83rem;color:var(--text);padding:0.8rem 0.75rem;}
+.tt-tag{font-family:'JetBrains Mono',monospace;font-size:0.6rem;padding:0.2rem 0.5rem;border-radius:4px;text-transform:uppercase;letter-spacing:1px;}
+
+/* COMPANY CARD */
+.co-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;}
+.co-name{font-family:'Space Grotesk',sans-serif;font-size:0.9rem;font-weight:600;color:var(--white);margin-bottom:0.75rem;}
+.co-row{display:flex;align-items:center;justify-content:space-between;padding:0.3rem 0;border-bottom:1px solid var(--border);font-size:0.75rem;}
+.co-row:last-child{border-bottom:none;}
+.co-key{color:var(--muted);}
+.co-badge{padding:0.15rem 0.5rem;border-radius:4px;font-size:0.65rem;font-family:'JetBrains Mono',monospace;font-weight:500;}
+.badge-green{background:rgba(16,185,129,0.15);color:var(--em);}
+.badge-yellow{background:rgba(245,158,11,0.15);color:var(--gold);}
+.badge-red{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--blue);}
+
+/* JOURNAL */
+.journal-entry{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem;}
+.je-date{font-size:0.65rem;color:var(--em);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:0.75rem;}
+.je-label{font-size:0.65rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.3rem;margin-top:0.75rem;}
+.je-text{font-size:0.83rem;color:var(--text);line-height:1.6;}
+textarea.je-input{background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.83rem;padding:0.6rem 0.8rem;width:100%;resize:vertical;outline:none;line-height:1.5;}
+textarea.je-input:focus{border-color:var(--em);}
+.mood-select{display:flex;gap:0.5rem;margin:0.5rem 0;}
+.mood-btn{padding:0.35rem 0.75rem;background:var(--card2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:0.9rem;transition:all 0.15s;}
+.mood-btn.active{border-color:var(--em);background:var(--em-dim);}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;backdrop-filter:blur(4px);}
+.overlay.open{display:flex;align-items:center;justify-content:center;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.75rem;min-width:320px;max-width:420px;width:90%;}
+.modal-title{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:1.25rem;}
+.inp{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.83rem;padding:0.6rem 0.8rem;outline:none;margin-bottom:0.75rem;}
+.inp:focus{border-color:var(--em);}
+.inp-label{font-size:0.65rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.3rem;display:block;}
+.btn-em{background:var(--em);border:none;color:#000;font-family:'Space Grotesk',sans-serif;font-size:0.83rem;font-weight:600;padding:0.65rem 1.25rem;border-radius:7px;cursor:pointer;width:100%;transition:opacity 0.15s;}
+.btn-em:hover{opacity:0.9;}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Inter',sans-serif;font-size:0.78rem;padding:0.5rem 1rem;border-radius:6px;cursor:pointer;width:100%;margin-top:0.5rem;}
+
+/* VISION BOARD */
+.vision-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.vision-card{aspect-ratio:4/3;background:var(--card2);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.vision-card:hover{border-color:var(--em);transform:scale(1.02);}
+.vision-label{font-size:0.72rem;color:var(--muted);font-family:'Space Grotesk',sans-serif;margin-top:0.5rem;font-weight:500;}
+
+/* QUOTE */
+.quote-card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--border);border-radius:10px;padding:1.75rem;text-align:center;}
+.quote-text{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:500;color:var(--white);line-height:1.6;margin-bottom:0.75rem;}
+.quote-attr{font-size:0.72rem;color:var(--em);font-family:'JetBrains Mono',monospace;letter-spacing:1px;}
+
+/* HERO */
+.hero-section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:3rem 2rem;max-width:900px;}
+.hero-greeting{font-size:0.75rem;color:var(--em);font-family:'JetBrains Mono',monospace;letter-spacing:2px;margin-bottom:1rem;}
+.hero-name{font-family:'Space Grotesk',sans-serif;font-size:clamp(3rem,7vw,5.5rem);font-weight:700;color:var(--white);line-height:0.95;letter-spacing:-2px;margin-bottom:0.5rem;}
+.hero-name span{color:var(--em);}
+.hero-tagline{font-size:1rem;color:var(--muted);margin-bottom:2.5rem;max-width:480px;line-height:1.6;}
+.hero-pills{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:2.5rem;}
+.pill{background:var(--card);border:1px solid var(--border);border-radius:99px;padding:0.35rem 0.85rem;font-size:0.75rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.5px;}
+.hero-countdowns{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.75rem;}
+
+/* GOAT SCORE RING */
+.goat-ring-wrap{display:flex;flex-direction:column;align-items:center;padding:1.5rem;}
+.goat-ring-svg{width:140px;height:140px;}
+.goat-score-num{font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:700;color:var(--white);}
+.goat-score-label{font-size:0.65rem;color:var(--em);font-family:'JetBrains Mono',monospace;letter-spacing:2px;margin-top:4px;}
+.goat-breakdown{font-size:0.72rem;color:var(--muted);text-align:center;max-width:200px;line-height:1.5;margin-top:0.5rem;}
+
+/* ENTRIES CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.75rem;}
+.chip{display:inline-flex;align-items:center;gap:0.35rem;background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:0.25rem 0.55rem;font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--muted);}
+.chip strong{color:var(--em);}
+.chip-del{cursor:pointer;color:var(--muted2);font-size:10px;margin-left:2px;}
+.chip-del:hover{color:var(--red);}
+
+/* ANALYTICS */
+.analytics-stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center;}
+.an-val{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;color:var(--white);}
+.an-lbl{font-size:0.65rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--black);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+
+/* MOBILE */
+@media(max-width:768px){
+  #sidebar{transform:translateX(-100%);}
+  #sidebar.open{transform:translateX(0);}
+  #main{margin-left:0;}
+  .grid2,.grid3,.grid4{grid-template-columns:1fr;}
+  .vision-grid{grid-template-columns:repeat(2,1fr);}
+  #mob-toggle{display:flex;}
+}
+#mob-toggle{display:none;position:fixed;top:1rem;left:1rem;z-index:300;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:0.5rem;cursor:pointer;font-size:1rem;}
+</style>
+</head>
+<body>
+
+<!-- MOBILE TOGGLE -->
+<button id="mob-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-text">GOATUJJU</div>
+    <div class="sb-logo-sub">Ujjwal Singh Chauhan · Rajput</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Main</div>
+    <div class="sb-item active" onclick="nav('home',this)"><span class="sb-item-icon">⚡</span>Home</div>
+    <div class="sb-item" onclick="nav('dashboard',this)"><span class="sb-item-icon">◉</span>Dashboard</div>
+    <div class="sb-item" onclick="nav('goals',this)"><span class="sb-item-icon">◎</span>Goals</div>
+
+    <div class="sb-section">Track</div>
+    <div class="sb-item" onclick="nav('fitness',this)"><span class="sb-item-icon">▲</span>Fitness</div>
+    <div class="sb-item" onclick="nav('coding',this)"><span class="sb-item-icon">{"}"}</span>Coding</div>
+    <div class="sb-item" onclick="nav('mba',this)"><span class="sb-item-icon">✦</span>MBA Prep</div>
+    <div class="sb-item" onclick="nav('habits',this)"><span class="sb-item-icon">◆</span>Habits</div>
+    <div class="sb-item" onclick="nav('journal',this)"><span class="sb-item-icon">◻</span>Journal</div>
+
+    <div class="sb-section">Plan</div>
+    <div class="sb-item" onclick="nav('calendar',this)"><span class="sb-item-icon">▦</span>Calendar</div>
+    <div class="sb-item" onclick="nav('timetable',this)"><span class="sb-item-icon">≡</span>Timetable</div>
+    <div class="sb-item" onclick="nav('placements',this)"><span class="sb-item-icon">◈</span>Placements</div>
+    <div class="sb-item" onclick="nav('roadmap',this)"><span class="sb-item-icon">→</span>Roadmap</div>
+
+    <div class="sb-section">Fuel</div>
+    <div class="sb-item" onclick="nav('vision',this)"><span class="sb-item-icon">✦</span>Vision Board</div>
+    <div class="sb-item" onclick="nav('analytics',this)"><span class="sb-item-icon">∿</span>Analytics</div>
+  </nav>
+  <div class="sb-goat">
+    <div class="sb-goat-label">GOAT SCORE</div>
+    <div class="sb-goat-score" id="sb-score">—</div>
+    <div class="sb-goat-bar"><div class="sb-goat-fill" id="sb-score-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="hero-section">
+    <div class="hero-greeting">// The Long Game — Started Jun 2025</div>
+    <div class="hero-name">GOAT<span>UJJU</span></div>
+    <div class="hero-tagline">Mechanical Engineering @ DTU · BBA(DBE) @ IIM Bangalore · Building towards IPS 2032.</div>
+    <div class="hero-pills">
+      <span class="pill">DTU · ME (Auto) · 2025–29</span>
+      <span class="pill">IIMB · DBE · 2025–28</span>
+      <span class="pill">CAT 2028 · 99.8%</span>
+      <span class="pill">GATE 2029 · &lt;200</span>
+      <span class="pill">PGDBA 2029 · &lt;10</span>
+      <span class="pill">IPS 2032</span>
+    </div>
+
+    <div class="sdiv"><span class="sdiv-label">Countdowns</span><div class="sdiv-line"></div></div>
+    <div class="hero-countdowns" id="countdowns"></div>
+
+    <div class="sdiv" style="margin-top:2rem;"><span class="sdiv-label">Today's Quote</span><div class="sdiv-line"></div></div>
+    <div class="quote-card" id="home-quote"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// Today</div>
+    <div class="ph-title">Dashboard</div>
+    <div class="ph-sub" id="dash-date"></div>
+  </div>
+
+  <!-- GOAT SCORE -->
+  <div class="card" style="display:flex;align-items:center;gap:2rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+    <div class="goat-ring-wrap">
+      <svg class="goat-ring-svg" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="50" fill="none" stroke="#1a1a1a" stroke-width="10"/>
+        <circle cx="60" cy="60" r="50" fill="none" stroke="#10B981" stroke-width="10"
+          stroke-dasharray="314" stroke-dashoffset="314"
+          stroke-linecap="round" transform="rotate(-90 60 60)"
+          id="goat-ring-circle" style="transition:stroke-dashoffset 1.5s cubic-bezier(.16,1,.3,1)"/>
+        <text x="60" y="58" text-anchor="middle" fill="#fff" font-family="Space Grotesk" font-size="20" font-weight="700" id="goat-ring-num">—</text>
+        <text x="60" y="74" text-anchor="middle" fill="#10B981" font-family="JetBrains Mono" font-size="7" letter-spacing="2">/100</text>
+      </svg>
+      <div class="goat-score-label">GOAT SCORE</div>
+    </div>
+    <div style="flex:1;min-width:200px;">
+      <div id="goat-verdict" style="font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;color:var(--white);margin-bottom:0.5rem;"></div>
+      <div id="goat-breakdown" style="font-size:0.78rem;color:var(--muted);line-height:1.7;"></div>
+    </div>
+  </div>
+
+  <!-- TODAY LOG -->
+  <div class="sdiv"><span class="sdiv-label">Log Today</span><div class="sdiv-line"></div></div>
+  <div class="grid4" style="margin-bottom:1.5rem;" id="today-cards"></div>
+
+  <!-- QUICK STATS -->
+  <div class="sdiv"><span class="sdiv-label">Overview</span><div class="sdiv-line"></div></div>
+  <div class="grid4" id="overview-stats"></div>
+</div>
+
+<!-- GOALS -->
+<div id="page-goals" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// Target Scores & Milestones</div>
+    <div class="ph-title">Goals</div>
+  </div>
+  <div class="grid2" id="goals-grid" style="margin-bottom:1.5rem;"></div>
+
+  <div class="sdiv"><span class="sdiv-label">Progress Charts</span><div class="sdiv-line"></div></div>
+  <div class="grid2" style="margin-bottom:1rem;">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">CF Rating</div>
+        <button class="chart-btn" onclick="openModal('cf')">+ Log</button>
+      </div>
+      <canvas id="cfChart" height="180"></canvas>
+      <div class="chips" id="cf-chips"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">CGPA History</div>
+        <button class="chart-btn" onclick="openModal('cgpa')">+ Log</button>
+      </div>
+      <canvas id="cgpaChart" height="180"></canvas>
+      <div class="chips" id="cgpa-chips"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FITNESS -->
+<div id="page-fitness" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// Weight Cut & Body</div>
+    <div class="ph-title">Fitness</div>
+  </div>
+
+  <div class="grid4" style="margin-bottom:1.5rem;">
+    <div class="stat-card">
+      <div class="stat-label">Current Weight</div>
+      <div class="stat-val" id="fit-weight">87.8</div>
+      <div class="stat-sub">kg</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Target</div>
+      <div class="stat-val" style="color:var(--em)">74</div>
+      <div class="stat-sub">kg by Dec 20</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">To Lose</div>
+      <div class="stat-val" id="fit-remaining">13.8</div>
+      <div class="stat-sub">kg remaining</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">BMI</div>
+      <div class="stat-val" id="fit-bmi">29.8</div>
+      <div class="stat-sub">target: ~25</div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:1rem;">
+    <div class="chart-header">
+      <div class="chart-title">Weight Trajectory — Projected vs Actual</div>
+      <button class="chart-btn" onclick="openModal('weight')">+ Log Weight</button>
+    </div>
+    <canvas id="weightChart" height="200"></canvas>
+    <div class="chips" id="weight-chips"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="stat-label" style="margin-bottom:0.75rem;">Gym This Week</div>
+      <div style="display:flex;gap:0.5rem;">
+        <div id="gym-week-dots" style="display:flex;gap:0.4rem;"></div>
+      </div>
+      <div style="margin-top:1rem;font-size:0.78rem;color:var(--muted);">Target: 5x per week</div>
+    </div>
+    <div class="card">
+      <div class="stat-label" style="margin-bottom:0.75rem;">Daily Deficit</div>
+      <div class="stat-val" style="font-size:1.4rem;">~1,000</div>
+      <div class="stat-sub">kcal/day target</div>
+      <button class="chart-btn" style="margin-top:0.75rem;" onclick="openModal('gym')">Log Gym Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- CODING -->
+<div id="page-coding" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// CP & DSA</div>
+    <div class="ph-title">Coding</div>
+  </div>
+  <div class="grid4" style="margin-bottom:1.5rem;">
+    <div class="stat-card">
+      <div class="stat-label">CF Rating</div>
+      <div class="stat-val" id="cf-current-stat">940</div>
+      <div class="stat-sub">Target: 1500 by Oct '27</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">LC Rating</div>
+      <div class="stat-val" id="lc-current-stat">1531</div>
+      <div class="stat-sub">Target: Knight + 700 Qs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">LC Questions</div>
+      <div class="stat-val" id="lc-q-stat">0</div>
+      <div class="stat-sub">Target: 700+</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">DSA Topic</div>
+      <div class="stat-val" style="font-size:1rem;" id="dsa-topic-stat">Arrays</div>
+      <div class="stat-sub">Current chapter</div>
+    </div>
+  </div>
+  <div class="grid2" style="margin-bottom:1rem;">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">CF Rating Progress</div>
+        <button class="chart-btn" onclick="openModal('cf')">+ Log</button>
+      </div>
+      <canvas id="cfChart2" height="200"></canvas>
+    </div>
+    <div class="card">
+      <div class="stat-label" style="margin-bottom:0.75rem;">DSA Roadmap</div>
+      <div id="dsa-roadmap-list" style="display:flex;flex-direction:column;gap:0.35rem;max-height:280px;overflow-y:auto;"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="chart-header">
+      <div class="chart-title">Log Coding Session</div>
+    </div>
+    <div class="grid2">
+      <div>
+        <label class="inp-label">CF Rating (after contest)</label>
+        <input class="inp" id="cf-inp-direct" type="number" placeholder="e.g. 1050">
+        <label class="inp-label">LC Questions Solved (total)</label>
+        <input class="inp" id="lc-q-inp" type="number" placeholder="e.g. 45">
+      </div>
+      <div>
+        <label class="inp-label">LC Rating</label>
+        <input class="inp" id="lc-r-inp" type="number" placeholder="e.g. 1600">
+        <label class="inp-label">DSA Chapter (current)</label>
+        <input class="inp" id="dsa-inp" type="text" placeholder="e.g. Binary Search">
+      </div>
+    </div>
+    <button class="btn-em" style="margin-top:0.5rem;" onclick="saveCodingLog()">Save Session</button>
+  </div>
+</div>
+
+<!-- MBA PREP -->
+<div id="page-mba" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// CAT & MBA</div>
+    <div class="ph-title">MBA Prep</div>
+  </div>
+  <div class="grid4" style="margin-bottom:1.5rem;">
+    <div class="stat-card">
+      <div class="stat-label">CAT 2027</div>
+      <div class="stat-val" style="color:var(--em)">99+</div>
+      <div class="stat-sub">%ile target · Nov 28</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">CAT 2028</div>
+      <div class="stat-val" style="color:var(--em)">99.8+</div>
+      <div class="stat-sub">%ile target · Nov 26</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Mocks Taken</div>
+      <div class="stat-val" id="cat-mocks">0</div>
+      <div class="stat-sub">Log below</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Best Percentile</div>
+      <div class="stat-val" id="cat-best-pct">—</div>
+      <div class="stat-sub">in mocks</div>
+    </div>
+  </div>
+  <div class="chart-card" style="margin-bottom:1rem;">
+    <div class="chart-header">
+      <div class="chart-title">Mock Percentile Trend</div>
+      <button class="chart-btn" onclick="openModal('cat')">+ Log Mock</button>
+    </div>
+    <canvas id="catChart" height="180"></canvas>
+    <div class="chips" id="cat-chips"></div>
+  </div>
+  <div class="grid3">
+    <div class="card" style="text-align:center;">
+      <div class="stat-label">VARC</div>
+      <div class="stat-val" id="cat-varc">—</div>
+      <div class="stat-sub">Last mock score</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="stat-label">DILR</div>
+      <div class="stat-val" id="cat-dilr">—</div>
+      <div class="stat-sub">Last mock score</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="stat-label">QA</div>
+      <div class="stat-val" id="cat-qa">—</div>
+      <div class="stat-sub">Last mock score</div>
+    </div>
+  </div>
+</div>
+
+<!-- HABITS -->
+<div id="page-habits" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// Streak Tracker</div>
+    <div class="ph-title">Habits</div>
+  </div>
+  <div class="card">
+    <div class="habit-grid" id="habit-grid"></div>
+  </div>
+  <div class="sdiv" style="margin-top:1.5rem;"><span class="sdiv-label">Log Today</span><div class="sdiv-line"></div></div>
+  <div class="card">
+    <div id="habit-checklist"></div>
+    <button class="btn-em" style="margin-top:1rem;" onclick="saveHabits()">Save Today's Habits</button>
+  </div>
+</div>
+
+<!-- JOURNAL -->
+<div id="page-journal" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// Daily Log</div>
+    <div class="ph-title">Journal</div>
+  </div>
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="je-date" id="journal-today-date"></div>
+    <label class="je-label">Today I did...</label>
+    <textarea class="je-input" id="j-did" rows="3" placeholder="What did you actually get done today?"></textarea>
+    <label class="je-label">Wins 🏆</label>
+    <textarea class="je-input" id="j-wins" rows="2" placeholder="Even small wins count."></textarea>
+    <label class="je-label">Mistakes / Learnings</label>
+    <textarea class="je-input" id="j-mistakes" rows="2" placeholder="What could have gone better?"></textarea>
+    <label class="je-label">Tomorrow's Plan</label>
+    <textarea class="je-input" id="j-tomorrow" rows="2" placeholder="3 things you WILL do tomorrow."></textarea>
+    <label class="je-label">Mood</label>
+    <div class="mood-select" id="mood-select">
+      <button class="mood-btn" onclick="setMood('🔥',this)">🔥</button>
+      <button class="mood-btn" onclick="setMood('💪',this)">💪</button>
+      <button class="mood-btn" onclick="setMood('😐',this)">😐</button>
+      <button class="mood-btn" onclick="setMood('😤',this)">😤</button>
+      <button class="mood-btn" onclick="setMood('😴',this)">😴</button>
+    </div>
+    <button class="btn-em" onclick="saveJournal()">Save Entry</button>
+  </div>
+  <div id="journal-past"></div>
+</div>
+
+<!-- CALENDAR -->
+<div id="page-calendar" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// 2026–2029</div>
+    <div class="ph-title">Calendar</div>
+  </div>
+  <div id="calendar-content"></div>
+</div>
+
+<!-- TIMETABLE -->
+<div id="page-timetable" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// Daily Schedules</div>
+    <div class="ph-title">Timetable</div>
+  </div>
+  <div class="tabs" id="tt-tabs"></div>
+  <div class="card" id="tt-content"></div>
+</div>
+
+<!-- PLACEMENTS -->
+<div id="page-placements" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// Target Companies</div>
+    <div class="ph-title">Placements</div>
+  </div>
+  <div class="grid3" id="companies-grid"></div>
+</div>
+
+<!-- ROADMAP -->
+<div id="page-roadmap" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// Master Plan 2025–2033</div>
+    <div class="ph-title">Roadmap</div>
+  </div>
+  <div class="grid2">
+    <div>
+      <div class="sdiv"><span class="sdiv-label">Career</span><div class="sdiv-line"></div></div>
+      <div class="timeline" id="career-tl"></div>
+    </div>
+    <div>
+      <div class="sdiv"><span class="sdiv-label">Exams</span><div class="sdiv-line"></div></div>
+      <div class="timeline" id="exam-tl"></div>
+    </div>
+  </div>
+</div>
+
+<!-- VISION -->
+<div id="page-vision" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// Why You're Doing This</div>
+    <div class="ph-title">Vision Board</div>
+  </div>
+  <div class="vision-grid" id="vision-grid"></div>
+  <div class="sdiv" style="margin-top:2rem;"><span class="sdiv-label">Rotating Motivation</span><div class="sdiv-line"></div></div>
+  <div id="quotes-list" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
+</div>
+
+<!-- ANALYTICS -->
+<div id="page-analytics" class="page">
+  <div class="ph">
+    <div class="ph-eyebrow">// Your Numbers</div>
+    <div class="ph-title">Analytics</div>
+  </div>
+  <div class="grid4" id="analytics-grid" style="margin-bottom:1.5rem;"></div>
+  <div class="chart-card">
+    <div class="chart-title" style="margin-bottom:1rem;">Weekly GOAT Score Trend</div>
+    <canvas id="analyticsChart" height="180"></canvas>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- MODAL -->
+<div class="overlay" id="modal-overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ─── STORAGE ──────────────────────────────────────────────────────
+const S = {
+  get:(k,d)=>{ try{const v=localStorage.getItem('gj_'+k);return v?JSON.parse(v):d;}catch(e){return d;} },
+  set:(k,v)=>{ try{localStorage.setItem('gj_'+k,JSON.stringify(v));}catch(e){} }
+};
+
+// ─── NAV ──────────────────────────────────────────────────────────
+function nav(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  if(id==='goals') initGoalCharts();
+  if(id==='coding') initCodingPage();
+  if(id==='mba') initMBAPage();
+  if(id==='analytics') initAnalytics();
+  if(id==='fitness') initFitnessPage();
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+// ─── COUNTDOWNS ────────────────────────────────────────────────────
+const countdownTargets = [
+  { label:'Dec 20 · Hard Launch', date:'2026-12-20', color:'var(--em)' },
+  { label:'CAT 2027', date:'2027-11-28', color:'var(--gold)' },
+  { label:'CAT 2028', date:'2028-11-26', color:'var(--blue)' },
+  { label:'GATE 2029', date:'2029-02-01', color:'var(--purple)' },
+  { label:'PGDBA 2029', date:'2029-05-01', color:'var(--em)' },
+  { label:'Weight Goal', date:'2026-12-20', color:'var(--red)' },
+];
+
+function renderCountdowns() {
+  const el = document.getElementById('countdowns');
+  el.innerHTML = countdownTargets.map((t,i) => {
+    const diff = new Date(t.date) - new Date();
+    const days = Math.max(0, Math.floor(diff/86400000));
+    return `<div class="countdown-card">
+      <div class="cc-label">${t.label}</div>
+      <div class="cc-num" style="color:${t.color}" id="cd-num-${i}">${days}</div>
+      <div class="cc-unit">DAYS</div>
+    </div>`;
+  }).join('');
+}
+renderCountdowns();
+
+// ─── QUOTES ────────────────────────────────────────────────────────
+const quotes = [
+  { text:"Discipline is remembering what you want.", attr:"David Campbell" },
+  { text:"Be so good they can't ignore you.", attr:"Steve Martin" },
+  { text:"The future belongs to those who prepare for it today.", attr:"Malcolm X" },
+  { text:"Every day counts. There are no dress rehearsals.", attr:"— " },
+  { text:"Hard work beats talent when talent doesn't work hard.", attr:"Tim Notke" },
+  { text:"They will beg. Keep going.", attr:"Ujjwal, Jun 2026" },
+  { text:"Comparison is the thief of joy. Run your own race.", attr:"Roosevelt" },
+  { text:"Not my tempo.", attr:"Fletcher, Whiplash" },
+  { text:"Success is the progressive realization of a worthy goal.", attr:"Earl Nightingale" },
+  { text:"IPS 2032. The mission is clear.", attr:"— " },
+];
+
+function renderQuotes() {
+  const q = quotes[Math.floor(Math.random()*quotes.length)];
+  const el = document.getElementById('home-quote');
+  if(el) el.innerHTML = `<div class="quote-text">"${q.text}"</div><div class="quote-attr">— ${q.attr}</div>`;
+
+  const ql = document.getElementById('quotes-list');
+  if(ql) ql.innerHTML = quotes.map(q=>`
+    <div class="card" style="padding:1rem;">
+      <div style="font-size:0.9rem;color:var(--white);font-family:'Space Grotesk',sans-serif;margin-bottom:0.25rem;">"${q.text}"</div>
+      <div style="font-size:0.68rem;color:var(--em);font-family:'JetBrains Mono',monospace;">— ${q.attr}</div>
+    </div>
+  `).join('');
+}
+renderQuotes();
+
+// ─── GOALS DATA ────────────────────────────────────────────────────
+const goals = [
+  { cat:'Academic', name:'DTU Passout CGPA', current:9.0, target:'8.5+', targetNum:8.5, max:10, deadline:'May 2029', color:'var(--em)', isGPA:true },
+  { cat:'Academic', name:'IIMB Passout CGPA', current:8.4, target:'7.5+', targetNum:7.5, max:10, deadline:'Jul 2028', color:'var(--em)', isGPA:true },
+  { cat:'CP', name:'Codeforces Rating', current:940, target:'1500+', targetNum:1500, max:1500, deadline:'Oct 2027', color:'var(--gold)' },
+  { cat:'CP', name:'LeetCode Rating', current:1531, target:'Knight', targetNum:1800, max:2000, deadline:'Dec 2027', color:'var(--gold)' },
+  { cat:'MBA', name:'CAT 2027', current:0, target:'99+%ile', targetNum:99, max:100, deadline:'Nov 28, 2027', color:'var(--blue)' },
+  { cat:'MBA', name:'CAT 2028', current:0, target:'99.8+%ile', targetNum:99.8, max:100, deadline:'Nov 26, 2028', color:'var(--blue)' },
+  { cat:'Engineering', name:'GATE 2028', current:0, target:'Rank <500', targetNum:100, max:100, deadline:'Feb 2028', color:'var(--purple)' },
+  { cat:'Engineering', name:'GATE 2029', current:0, target:'Rank <200', targetNum:100, max:100, deadline:'Feb 2029', color:'var(--purple)' },
+  { cat:'Engineering', name:'PGDBA 2029', current:0, target:'Rank <10', targetNum:100, max:100, deadline:'2029', color:'var(--purple)' },
+  { cat:'Fitness', name:'Weight', current:87.8, target:'74 kg', targetNum:74, max:87.8, deadline:'Dec 20, 2026', color:'var(--red)', isWeight:true },
+  { cat:'MBA', name:'MBA Passout', current:0, target:'Top 10%ile', targetNum:100, max:100, deadline:'2031', color:'var(--blue)' },
+  { cat:'Life', name:'IPS Selection', current:0, target:'2032', targetNum:100, max:100, deadline:'2032', color:'var(--gold)' },
+];
+
+function buildGoals() {
+  const grid = document.getElementById('goals-grid');
+  if(!grid) return;
+  grid.innerHTML = goals.map(g => {
+    let pct;
+    if(g.isWeight) pct = Math.round(((87.8 - g.current) / (87.8 - 74)) * 100);
+    else if(g.isGPA) pct = Math.round((g.current / 10) * 100);
+    else pct = Math.min(Math.round((g.current / (g.targetNum||g.max)) * 100), 100);
+    pct = Math.max(0, Math.min(100, pct));
+    return `<div class="goal-card">
+      <div class="goal-card-stripe" style="background:${g.color}"></div>
+      <div class="goal-cat">${g.cat}</div>
+      <div class="goal-name">${g.name}</div>
+      <div class="goal-nums">
+        <div class="goal-current-block">
+          <div class="goal-current-lbl">Current</div>
+          <div class="goal-current-val">${g.current||'—'}</div>
+        </div>
+        <div class="goal-target-block">
+          <div class="goal-target-lbl">Target</div>
+          <div class="goal-target-val" style="color:${g.color}">${g.target}</div>
+        </div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${g.color}"></div></div>
+      <div class="bar-pct">${pct}% there</div>
+      <div class="goal-deadline">📅 ${g.deadline}</div>
+    </div>`;
+  }).join('');
+}
+buildGoals();
+
+// ─── GOAT SCORE ────────────────────────────────────────────────────
+function calcGoatScore() {
+  const today = S.get('today', {});
+  const habits = S.get('habits_today', {});
+  const weight = S.get('weight_entries', [{date:'Jun 21',val:87.8}]);
+  const cf = S.get('cf_entries', [{label:"Jun '26", val:940}]);
+
+  let score = 0, breakdown = [];
+
+  // Gym (25 pts)
+  const gymDays = S.get('gym_week', 0);
+  const gymScore = Math.round((Math.min(gymDays,5)/5)*25);
+  score += gymScore;
+  breakdown.push(`Gym: ${gymDays}/5 sessions → ${gymScore}/25`);
+
+  // Study hours (20 pts)
+  const studyHrs = today.study_hours || 0;
+  const studyScore = Math.round((Math.min(studyHrs,8)/8)*20);
+  score += studyScore;
+  breakdown.push(`Study: ${studyHrs}h → ${studyScore}/20`);
+
+  // DSA / CF (20 pts)
+  const cfCurrent = cf.length ? cf[cf.length-1].val : 940;
+  const cfProgress = Math.min((cfCurrent - 800) / (1500 - 800), 1);
+  const cpScore = Math.round(cfProgress * 20);
+  score += cpScore;
+  breakdown.push(`CP (CF ${cfCurrent}): ${cpScore}/20`);
+
+  // Weight progress (20 pts)
+  const curW = weight.length ? weight[weight.length-1].val : 87.8;
+  const wProgress = Math.min((87.8 - curW) / (87.8 - 74), 1);
+  const wScore = Math.round(wProgress * 20);
+  score += wScore;
+  breakdown.push(`Weight (${curW}kg): ${wScore}/20`);
+
+  // Sleep & consistency (15 pts)
+  const sleep = today.sleep || 0;
+  const sleepScore = sleep >= 7 ? 15 : sleep >= 6 ? 10 : sleep >= 5 ? 5 : 0;
+  score += sleepScore;
+  breakdown.push(`Sleep (${sleep}h): ${sleepScore}/15`);
+
+  return { score: Math.round(score), breakdown };
+}
+
+function updateGoatScore() {
+  const { score, breakdown } = calcGoatScore();
+  const pct = score / 100;
+  const dashOffset = 314 * (1 - pct);
+
+  const ring = document.getElementById('goat-ring-circle');
+  const num = document.getElementById('goat-ring-num');
+  const sb = document.getElementById('sb-score');
+  const sbFill = document.getElementById('sb-score-fill');
+  const verdict = document.getElementById('goat-verdict');
+  const bd = document.getElementById('goat-breakdown');
+
+  if(ring) ring.setAttribute('stroke-dashoffset', dashOffset);
+  if(num) num.textContent = score;
+  if(sb) sb.textContent = score;
+  if(sbFill) sbFill.style.width = score + '%';
+
+  const msg = score >= 85 ? "🔥 Ahead of schedule. GOAT behavior." :
+              score >= 70 ? "💪 Solid day. Small gaps to close." :
+              score >= 50 ? "😐 Decent, but you can do better." :
+              "⚡ Reset. Tomorrow you come back harder.";
+  if(verdict) verdict.textContent = msg;
+  if(bd) bd.innerHTML = breakdown.map(b=>`<div>• ${b}</div>`).join('');
+}
+
+// ─── DASHBOARD ─────────────────────────────────────────────────────
+function buildDashboard() {
+  const today = S.get('today', {});
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  const todayFields = [
+    { id:'study_hours', label:'Study Hours', icon:'📚', unit:'hrs', type:'number', max:16, placeholder:'0' },
+    { id:'problems_solved', label:'Problems Today', icon:'⚡', unit:'probs', type:'number', max:20, placeholder:'0' },
+    { id:'calories', label:'Calories', icon:'🔥', unit:'kcal', type:'number', max:4000, placeholder:'1800' },
+    { id:'sleep', label:'Sleep', icon:'🌙', unit:'hrs', type:'number', max:12, placeholder:'7' },
+  ];
+
+  document.getElementById('today-cards').innerHTML = todayFields.map(f=>`
+    <div class="stat-card" style="cursor:default;">
+      <div class="stat-label">${f.icon} ${f.label}</div>
+      <input type="${f.type}" class="inp" style="font-size:1.4rem;font-family:'Space Grotesk',sans-serif;font-weight:700;padding:0.25rem 0;border:none;border-bottom:1px solid var(--border2);border-radius:0;background:none;width:100%;"
+        value="${today[f.id]||''}" placeholder="${f.placeholder}"
+        oninput="saveTodayField('${f.id}',this.value)">
+      <div class="stat-sub">${f.unit}</div>
+    </div>
+  `).join('');
+
+  // Overview stats
+  const weight = S.get('weight_entries', [{date:'Jun 21',val:87.8}]);
+  const cf = S.get('cf_entries', [{label:"Jun '26", val:940}]);
+  const curW = weight.length ? weight[weight.length-1].val : 87.8;
+  const curCF = cf.length ? cf[cf.length-1].val : 940;
+
+  document.getElementById('overview-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Current Weight</div><div class="stat-val">${curW}<span style="font-size:1rem;color:var(--muted)">kg</span></div><div class="stat-delta down">↓ Target: 74kg</div></div>
+    <div class="stat-card"><div class="stat-label">CF Rating</div><div class="stat-val">${curCF}</div><div class="stat-delta up">→ Target: 1500</div></div>
+    <div class="stat-card"><div class="stat-label">DTU CGPA</div><div class="stat-val">9.0</div><div class="stat-delta up">↑ Target: 8.5+</div></div>
+    <div class="stat-card"><div class="stat-label">Days to Launch</div><div class="stat-val" style="font-size:1.4rem;">${Math.floor((new Date('2026-12-20')-new Date())/86400000)}</div><div class="stat-sub">Dec 20</div></div>
+  `;
+
+  updateGoatScore();
+}
+buildDashboard();
+
+function saveTodayField(field, val) {
+  const today = S.get('today', {});
+  today[field] = parseFloat(val) || 0;
+  S.set('today', today);
+  updateGoatScore();
+}
+
+// ─── CHARTS ────────────────────────────────────────────────────────
+const chartCfg = {
+  responsive:true,
+  plugins:{legend:{display:true,labels:{color:'#888',font:{size:10,family:'JetBrains Mono'}}}},
+  scales:{
+    x:{grid:{color:'#1a1a1a'},ticks:{color:'#555',font:{size:9,family:'JetBrains Mono'}}},
+    y:{grid:{color:'#1a1a1a'},ticks:{color:'#555',font:{size:9,family:'JetBrains Mono'}}}
+  }
+};
+
+let chartsBuilt = {};
+
+function initGoalCharts() {
+  if(chartsBuilt.goals) return;
+  chartsBuilt.goals = true;
+
+  const cfEntries = S.get('cf_entries', [{label:"Jun '26",val:940}]);
+  const cfLabels = ["Jun '26","Jan '27","Apr '27","Jul '27","Oct '27"];
+  const cfProj = [940,1050,1200,1350,1500];
+
+  new Chart(document.getElementById('cfChart'), {
+    type:'line',
+    data:{
+      labels: cfLabels,
+      datasets:[
+        {label:'Target',data:cfProj,borderColor:'rgba(245,158,11,0.3)',borderDash:[4,3],tension:0.4,fill:false,pointRadius:3,pointBackgroundColor:'rgba(245,158,11,0.3)'},
+        {label:'Actual',data:cfLabels.map(l=>{ const e=cfEntries.find(x=>x.label===l); return e?e.val:null; }),borderColor:'#F59E0B',backgroundColor:'rgba(245,158,11,0.08)',tension:0.4,fill:true,pointBackgroundColor:'#F59E0B',pointRadius:5}
+      ]
+    },
+    options:{...chartCfg,plugins:{...chartCfg.plugins,tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y}}}}
+  });
+
+  const cgpaEntries = S.get('cgpa_entries', [{label:'DTU Sem1',val:9.0,type:'dtu'},{label:'IIMB T2',val:8.4,type:'iimb'}]);
+  const targets = [{label:'Target DTU',val:8.5,type:'target'},{label:'Target IIMB',val:7.5,type:'target'}];
+  const all = [...cgpaEntries,...targets];
+  new Chart(document.getElementById('cgpaChart'),{
+    type:'bar',
+    data:{
+      labels:all.map(e=>e.label),
+      datasets:[{
+        data:all.map(e=>e.val),
+        backgroundColor:all.map(e=>e.type==='target'?'rgba(16,185,129,0.2)':e.type==='dtu'?'#10B981':'#34D399'),
+        borderRadius:4
+      }]
+    },
+    options:{...chartCfg,scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:6,max:10}},plugins:{legend:{display:false}}}
+  });
+
+  renderChips('cf_entries', 'cf-chips', 'val', '#F59E0B');
+  renderChips('cgpa_entries', 'cgpa-chips', 'val', '#10B981');
+}
+
+function initFitnessPage() {
+  if(chartsBuilt.fitness) return;
+  chartsBuilt.fitness = true;
+
+  const entries = S.get('weight_entries', [{date:'Jun 21',val:87.8}]);
+  const projL = ['Jun 21','Jul 20','Aug 20','Sep 20','Oct 20','Nov 20','Dec 20'];
+  const projD = [87.8,84.5,81.5,79.0,77.0,75.5,74.0];
+  const actD = projL.map(l=>{ const e=entries.find(x=>x.date===l); return e?e.val:null; });
+
+  new Chart(document.getElementById('weightChart'),{
+    type:'line',
+    data:{
+      labels:projL,
+      datasets:[
+        {label:'Projected',data:projD,borderColor:'rgba(239,68,68,0.3)',borderDash:[4,3],tension:0.4,fill:false,pointRadius:3,pointBackgroundColor:'rgba(239,68,68,0.3)'},
+        {label:'Actual',data:actD,borderColor:'#EF4444',backgroundColor:'rgba(239,68,68,0.1)',tension:0.4,fill:true,pointBackgroundColor:'#F59E0B',pointRadius:6}
+      ]
+    },
+    options:{...chartCfg,plugins:{...chartCfg.plugins,tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+' kg'}}}}
+  });
+
+  const curW = entries.length ? entries[entries.length-1].val : 87.8;
+  document.getElementById('fit-weight').textContent = curW;
+  document.getElementById('fit-remaining').textContent = Math.max(0,(curW-74)).toFixed(1);
+  const bmi = (curW / (1.715*1.715)).toFixed(1);
+  document.getElementById('fit-bmi').textContent = bmi;
+
+  renderChips('weight_entries','weight-chips','val','#EF4444');
+
+  // Gym week dots
+  const gymDays = S.get('gym_week', 0);
+  const dots = document.getElementById('gym-week-dots');
+  if(dots) dots.innerHTML = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=>`
+    <div style="text-align:center;">
+      <div style="width:28px;height:28px;border-radius:6px;background:${i<gymDays?'var(--em)':'var(--border)'};margin-bottom:4px;cursor:pointer;" onclick="toggleGymDay(${i})"></div>
+      <div style="font-size:0.55rem;color:var(--muted);font-family:'JetBrains Mono',monospace;">${d}</div>
+    </div>`).join('');
+}
+
+function toggleGymDay(i) {
+  let gd = S.get('gym_week', 0);
+  gd = gd === i+1 ? i : i+1;
+  S.set('gym_week', i+1);
+  chartsBuilt.fitness = false;
+  initFitnessPage();
+  updateGoatScore();
+}
+
+function initCodingPage() {
+  const coding = S.get('coding', {cf:940, lc_rating:1531, lc_q:0, dsa:'Arrays'});
+  document.getElementById('cf-current-stat').textContent = coding.cf || 940;
+  document.getElementById('lc-current-stat').textContent = coding.lc_rating || 1531;
+  document.getElementById('lc-q-stat').textContent = coding.lc_q || 0;
+  document.getElementById('dsa-topic-stat').textContent = coding.dsa || 'Arrays';
+
+  document.getElementById('cf-inp-direct').value = coding.cf || '';
+  document.getElementById('lc-q-inp').value = coding.lc_q || '';
+  document.getElementById('lc-r-inp').value = coding.lc_rating || '';
+  document.getElementById('dsa-inp').value = coding.dsa || '';
+
+  const dsaTopics = ['Arrays','Hashing','Binary Search','Bit Manipulation','Two Pointers','Maths CP','Linked List','Stack & Queues','Recursion & Backtracking','Heaps & Maps','Binary Trees & BST','DP & DP with Bitmasking','Graphs/BFS/DFS/TopoSort','Shortest Path','MST/DSU','Trie','Strings/KMP/Z-algo','Fenwick Tree','SegTree/Lazy Propagation','LCA/Binary Lifting','Articulation Points & Bridges','SCC','Hamiltonian Path'];
+  const curIdx = dsaTopics.indexOf(coding.dsa || 'Arrays');
+  document.getElementById('dsa-roadmap-list').innerHTML = dsaTopics.map((t,i)=>`
+    <div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0;border-bottom:1px solid var(--border);">
+      <div style="width:18px;height:18px;border-radius:4px;background:${i<curIdx?'var(--em)':i===curIdx?'var(--gold)':'var(--border)'};flex-shrink:0;"></div>
+      <span style="font-size:0.78rem;color:${i===curIdx?'var(--gold)':i<curIdx?'var(--muted2)':'var(--text)'};">${t}</span>
+      ${i===curIdx?'<span style="font-size:0.6rem;color:var(--gold);font-family:JetBrains Mono,monospace;margin-left:auto;">CURRENT</span>':''}
+    </div>`).join('');
+
+  if(!chartsBuilt.coding) {
+    chartsBuilt.coding = true;
+    const cfE = S.get('cf_entries', [{label:"Jun '26",val:940}]);
+    const cfLabels = ["Jun '26","Jan '27","Apr '27","Jul '27","Oct '27"];
+    const cfProj = [940,1050,1200,1350,1500];
+    new Chart(document.getElementById('cfChart2'),{
+      type:'line',
+      data:{labels:cfLabels,datasets:[
+        {label:'Target',data:cfProj,borderColor:'rgba(245,158,11,0.3)',borderDash:[4,3],tension:0.4,fill:false,pointRadius:3,pointBackgroundColor:'rgba(245,158,11,0.3)'},
+        {label:'Actual',data:cfLabels.map(l=>{const e=cfE.find(x=>x.label===l);return e?e.val:null;}),borderColor:'#F59E0B',backgroundColor:'rgba(245,158,11,0.08)',tension:0.4,fill:true,pointBackgroundColor:'#F59E0B',pointRadius:5}
+      ]},
+      options:chartCfg
+    });
+  }
+}
+
+function saveCodingLog() {
+  const cf = parseInt(document.getElementById('cf-inp-direct').value)||0;
+  const lc_q = parseInt(document.getElementById('lc-q-inp').value)||0;
+  const lc_rating = parseInt(document.getElementById('lc-r-inp').value)||0;
+  const dsa = document.getElementById('dsa-inp').value.trim();
+  S.set('coding', { cf: cf||S.get('coding',{}).cf||940, lc_q: lc_q||S.get('coding',{}).lc_q||0, lc_rating: lc_rating||S.get('coding',{}).lc_rating||1531, dsa: dsa||S.get('coding',{}).dsa||'Arrays' });
+
+  if(cf) {
+    const cfEntries = S.get('cf_entries', []);
+    const now = new Date();
+    const label = now.toLocaleString('en',{month:'short'})+" '"+String(now.getFullYear()).slice(-2);
+    const idx = cfEntries.findIndex(e=>e.label===label);
+    if(idx>=0) cfEntries[idx].val=cf; else cfEntries.push({label,val:cf});
+    S.set('cf_entries', cfEntries);
+  }
+
+  chartsBuilt.coding = false;
+  alert('Session saved ✓');
+  initCodingPage();
+  updateGoatScore();
+}
+
+function initMBAPage() {
+  const mocks = S.get('cat_mocks', []);
+  document.getElementById('cat-mocks').textContent = mocks.length;
+  const best = mocks.length ? Math.max(...mocks.map(m=>m.pct)) : null;
+  document.getElementById('cat-best-pct').textContent = best ? best+'%' : '—';
+  if(mocks.length) {
+    const last = mocks[mocks.length-1];
+    document.getElementById('cat-varc').textContent = last.varc || '—';
+    document.getElementById('cat-dilr').textContent = last.dilr || '—';
+    document.getElementById('cat-qa').textContent = last.qa || '—';
+  }
+  if(!chartsBuilt.mba) {
+    chartsBuilt.mba = true;
+    new Chart(document.getElementById('catChart'),{
+      type:'line',
+      data:{
+        labels:mocks.map((_,i)=>'Mock '+(i+1)),
+        datasets:[{label:'Percentile',data:mocks.map(m=>m.pct),borderColor:'#3B82F6',backgroundColor:'rgba(59,130,246,0.08)',tension:0.4,fill:true,pointBackgroundColor:'#3B82F6',pointRadius:5}]
+      },
+      options:{...chartCfg,scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:100}}}
+    });
+  }
+  renderChips('cat_mocks','cat-chips','pct','#3B82F6');
+}
+
+function initAnalytics() {
+  if(chartsBuilt.analytics) return;
+  chartsBuilt.analytics = true;
+  const scores = S.get('goat_history', []);
+  new Chart(document.getElementById('analyticsChart'),{
+    type:'line',
+    data:{
+      labels:scores.map(s=>s.date),
+      datasets:[{label:'GOAT Score',data:scores.map(s=>s.score),borderColor:'#10B981',backgroundColor:'rgba(16,185,129,0.08)',tension:0.4,fill:true,pointBackgroundColor:'#10B981',pointRadius:4}]
+    },
+    options:{...chartCfg,scales:{...chartCfg.scales,y:{...chartCfg.scales.y,min:0,max:100}}}
+  });
+  const grid = document.getElementById('analytics-grid');
+  const w = S.get('weight_entries',[{val:87.8}]);
+  const cf = S.get('cf_entries',[{val:940}]);
+  grid.innerHTML = [
+    {label:'Weight Lost',val:(87.8-(w[w.length-1]||{val:87.8}).val).toFixed(1)+' kg'},
+    {label:'CF Gained',val:'+'+((cf[cf.length-1]||{val:940}).val-940)},
+    {label:'Mocks Done',val:S.get('cat_mocks',[]).length},
+    {label:'Journal Entries',val:S.get('journal_entries',[]).length},
+  ].map(s=>`<div class="analytics-stat"><div class="an-val">${s.val}</div><div class="an-lbl">${s.label}</div></div>`).join('');
+}
+
+// ─── CHIPS ─────────────────────────────────────────────────────────
+function renderChips(key, elId, field, color) {
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const items = S.get(key, []);
+  el.innerHTML = items.map((item,i)=>`
+    <span class="chip">
+      ${item.label||item.date}: <strong style="color:${color}">${item[field]}</strong>
+      <span class="chip-del" onclick="deleteChip('${key}',${i},'${elId}','${field}','${color}')">×</span>
+    </span>`).join('');
+}
+function deleteChip(key, i, elId, field, color) {
+  const items = S.get(key,[]);
+  items.splice(i,1);
+  S.set(key,items);
+  renderChips(key,elId,field,color);
+  chartsBuilt = {};
+}
+
+// ─── HABITS ────────────────────────────────────────────────────────
+const habitDefs = [
+  {id:'gym',label:'Gym',color:'var(--em)'},
+  {id:'dsa',label:'DSA',color:'var(--gold)'},
+  {id:'no_junk',label:'No Junk',color:'var(--em)'},
+  {id:'reading',label:'Reading',color:'var(--blue)'},
+  {id:'skincare',label:'Skincare',color:'var(--purple)'},
+  {id:'sleep_good',label:'Good Sleep',color:'var(--em)'},
+];
+
+function buildHabits() {
+  const hgrid = document.getElementById('habit-grid');
+  const hcheck = document.getElementById('habit-checklist');
+  if(!hgrid || !hcheck) return;
+
+  hgrid.innerHTML = habitDefs.map(h=>{
+    const history = S.get('habit_'+h.id, []);
+    const streak = calcStreak(history);
+    const last30 = Array.from({length:30},(_,i)=>{
+      const d = new Date(); d.setDate(d.getDate()-29+i);
+      const key = d.toISOString().split('T')[0];
+      return `<div class="habit-dot ${history.includes(key)?'done':''}" title="${key}"></div>`;
+    }).join('');
+    return `<div class="habit-row">
+      <div class="habit-name">${h.label}</div>
+      <div class="habit-streak-bar">${last30}</div>
+      <div class="habit-count" style="color:${h.color}">${streak}d</div>
+    </div>`;
+  }).join('');
+
+  const today = new Date().toISOString().split('T')[0];
+  hcheck.innerHTML = habitDefs.map(h=>{
+    const history = S.get('habit_'+h.id,[]);
+    const done = history.includes(today);
+    return `<div class="cl-item ${done?'done':''}" onclick="toggleHabit('${h.id}',this)">
+      <div class="cl-box"></div>
+      <div class="cl-text">${h.label}</div>
+    </div>`;
+  }).join('');
+}
+buildHabits();
+
+function calcStreak(history) {
+  let streak=0;
+  const today = new Date();
+  for(let i=0;i<365;i++){
+    const d = new Date(today); d.setDate(d.getDate()-i);
+    const key = d.toISOString().split('T')[0];
+    if(history.includes(key)) streak++; else break;
+  }
+  return streak;
+}
+
+function toggleHabit(id, el) { el.classList.toggle('done'); }
+
+function saveHabits() {
+  const today = new Date().toISOString().split('T')[0];
+  document.querySelectorAll('#habit-checklist .cl-item').forEach((el,i)=>{
+    const h = habitDefs[i];
+    let history = S.get('habit_'+h.id,[]);
+    if(el.classList.contains('done') && !history.includes(today)) history.push(today);
+    else if(!el.classList.contains('done')) history = history.filter(d=>d!==today);
+    S.set('habit_'+h.id, history);
+  });
+  buildHabits();
+  updateGoatScore();
+  alert('Habits saved ✓');
+}
+
+// ─── JOURNAL ───────────────────────────────────────────────────────
+let selectedMood = '';
+function setMood(m, el) {
+  selectedMood = m;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function saveJournal() {
+  const entry = {
+    date: new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'}),
+    did: document.getElementById('j-did').value,
+    wins: document.getElementById('j-wins').value,
+    mistakes: document.getElementById('j-mistakes').value,
+    tomorrow: document.getElementById('j-tomorrow').value,
+    mood: selectedMood,
+  };
+  const entries = S.get('journal_entries',[]);
+  entries.unshift(entry);
+  S.set('journal_entries', entries);
+  renderJournal();
+  alert('Entry saved ✓');
+}
+
+function renderJournal() {
+  document.getElementById('journal-today-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const entries = S.get('journal_entries',[]);
+  const past = document.getElementById('journal-past');
+  if(!past) return;
+  past.innerHTML = entries.slice(0,10).map(e=>`
+    <div class="journal-entry">
+      <div class="je-date">${e.mood||''} ${e.date}</div>
+      ${e.did?`<div class="je-label">Did</div><div class="je-text">${e.did}</div>`:''}
+      ${e.wins?`<div class="je-label">Wins</div><div class="je-text">${e.wins}</div>`:''}
+      ${e.mistakes?`<div class="je-label">Learnings</div><div class="je-text">${e.mistakes}</div>`:''}
+      ${e.tomorrow?`<div class="je-label">Tomorrow</div><div class="je-text">${e.tomorrow}</div>`:''}
+    </div>`).join('');
+}
+renderJournal();
+
+// ─── CALENDAR ──────────────────────────────────────────────────────
+const calData = {
+  2026:[
+    {month:'July',phase:'Home + Wedding',items:['Sister Ojaswini wedding Jul 10-15 🎊','Gym 5x/week','1k deficit daily','CP light grind','Free afterwards']},
+    {month:'August',phase:'DTU Sem 3',items:['DTU 3rd sem begins','Settle hostel routine','Lock study schedule','Resume gym Delhi']},
+    {month:'September',phase:'Exam Cluster',items:['IIMB 3rd tri endsems 1st week','IIMB 4th tri begins','DTU midsems 20-30th','Stress gym — non-negotiable']},
+    {month:'October',phase:'DTU Grind',items:['Regular DTU classes','CF weekly contest','LC Sunday contest','Skincare consistent']},
+    {month:'November',phase:'Pre-Endsems',items:['DTU endsems begin Nov 20','Grind all subjects','CP minimum 1/day','Gym 3x minimum']},
+    {month:'December',phase:'🔥 RELAUNCH',items:['Endsems done Dec 15','FULLY FREE','Dec 20 — Hard Launch','74 kg achieved','They will beg']},
+  ],
+  2027:[
+    {month:'January',phase:'DTU Sem 4',items:['DTU 4th sem begins','IIMB endsems last week','Resume full CP grind']},
+    {month:'February',phase:'Regular Grind',items:['IIMB Tri 5 begins','DTU midsems last week','CF push → 1100','Stuti birthday — upgrade wish']},
+    {month:'March',phase:'DTU Classes',items:['CP 2 problems/day','LC Knight push','Tennis 1-2x/week']},
+    {month:'April',phase:'Pre-Endsems',items:['DTU endsems Apr 15','IIMB Tri 5 prep','CP minimum 1/day']},
+    {month:'May',phase:'FREE + CAT Starts',items:['DTU done May 5','START CAT SERIOUSLY','CP full send','CF target 1200+']},
+    {month:'June',phase:'Summer Grind',items:['IIMB 6th tri begins','CAT mocks start','Intern if available']},
+    {month:'July',phase:'Summer II',items:['Free — max productivity','CAT sectional daily','CP 3+/day']},
+    {month:'August',phase:'DTU Sem 5',items:['Balance DTU + CAT + CP','CF 1350+ target']},
+    {month:'September',phase:'Exam Cluster',items:['DTU midsems last week','IIMB exams 1st week','CAT crunch incoming']},
+    {month:'October',phase:'Pre-CAT Crunch',items:['CAT 2027 LAST MONTH','CF 1500 — this month','Full mocks weekly']},
+    {month:'November',phase:'CAT 2027 🎯',items:['DTU endsems Nov 15','CAT 2027 Nov 28 — EXECUTE','Analyze performance']},
+    {month:'December',phase:'Free + GATE Prep',items:['Analyze CAT 2027','GATE 2028 light prep','Tennis + fitness']},
+  ],
+  2028:[
+    {month:'January',phase:'DTU Sem 6 — CGPA Lock',items:['CRITICAL sem for placements','IIMB Tri 7 exams last week','GATE 2028 prep parallel']},
+    {month:'February',phase:'GATE 2028 🎯',items:['GATE 2028 — Rank <500','IIMB Tri 8 begins','Good companies arrive']},
+    {month:'March',phase:'Placements Begin',items:['Company PPTs start','Resume + LinkedIn ready','CAT 2028 early prep']},
+    {month:'April',phase:'Endsems',items:['DTU endsems Apr 15','Score 8.5+ all subjects','Placement drives parallel']},
+    {month:'May',phase:'Intern Begins',items:['Intern starts','IIMB Tri 8 exams mid-month','CAT 2028 continue']},
+    {month:'June',phase:'Intern II',items:['Intern — perform well','CAT mocks ongoing']},
+    {month:'July',phase:'Intern III',items:['IIMB final tri exams conclude','CAT 2028 acceleration']},
+    {month:'August',phase:'DTU Sem 7 + Placements',items:['FTE companies arrive','DTU + IIMB on resume now','CP sharp for OAs']},
+    {month:'September',phase:'Peak Placements',items:['DTU midsems last week','Placement drive peak','CAT crunch starts']},
+    {month:'October',phase:'Pre-CAT 2028',items:['CAT 2028 last month','PGDBA prep begins seriously']},
+    {month:'November',phase:'CAT 2028 🎯',items:['DTU endsems Nov 15','CAT 2028 Nov 26 — 99.8% TARGET','PGDBA kicks in']},
+    {month:'December',phase:'PGDBA + GATE',items:['PGDBA full prep','GATE 2029 begins','Evaluate FTO offers']},
+  ],
+  2029:[
+    {month:'January',phase:'Final DTU Sem',items:['Internship sem Jan-Jun','GATE 2029 prep parallel','IES 2029 prep','MBA GD-PI prep']},
+    {month:'February',phase:'GATE 2029 🎯',items:['GATE 2029 — Rank <200','PGDBA — Rank <10','MBA interview prep']},
+    {month:'March',phase:'MBA Interviews',items:['IIM A/B/C/L/M + FMS/ISB/XLRI','IES exam attempt','PGDBA results']},
+    {month:'April',phase:'MBA Interviews II',items:['Interview season peak','Evaluate all offers','IES results']},
+    {month:'May',phase:'MBA Results 🎓',items:['MBA results announced','DTU graduation','Decision time','IES list']},
+    {month:'June',phase:'MBA Begins 🚀',items:['Join MBA if IIM A/B/C/L/M or FMS/ISB/XLRI','OR FTO >30LPA','IPS journey begins','Relaunch 2.0']},
+  ]
+};
+
+function buildCalendar() {
+  const el = document.getElementById('calendar-content');
+  if(!el) return;
+  el.innerHTML = Object.entries(calData).map(([year,months])=>`
+    <div style="margin-bottom:2rem;">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:var(--em);margin-bottom:1rem;letter-spacing:1px;">${year}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0.75rem;">
+        ${months.map(m=>`
+          <div class="card" style="padding:1rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+              <div style="font-family:'Space Grotesk',sans-serif;font-size:0.95rem;font-weight:600;color:var(--white);">${m.month}</div>
+              <div style="font-size:0.6rem;color:var(--em);font-family:'JetBrains Mono',monospace;letter-spacing:1px;">${m.phase}</div>
+            </div>
+            ${m.items.map((item,i)=>`
+              <div class="cl-item" onclick="this.classList.toggle('done')">
+                <div class="cl-box"></div>
+                <div class="cl-text" style="font-size:0.78rem;">${item}</div>
+              </div>`).join('')}
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+buildCalendar();
+
+// ─── TIMETABLE ─────────────────────────────────────────────────────
+const timetables = {
+  'Summer (Home)':[
+    {time:'10-11 AM',task:'Wake up, morning routine, skincare',tag:'routine',tagColor:'#10B981'},
+    {time:'11 AM-1 PM',task:'CP / DSA grind — 2+ problems',tag:'cp',tagColor:'#F59E0B'},
+    {time:'1-2 PM',task:'Lunch + rest',tag:'break',tagColor:'#555'},
+    {time:'2-4 PM',task:'CP continued or IIMB academics',tag:'study',tagColor:'#6366F1'},
+    {time:'4-5 PM',task:'Break / phone / laimy',tag:'break',tagColor:'#555'},
+    {time:'5-7 PM',task:'GYM — 5x/week, non-negotiable',tag:'gym',tagColor:'#EF4444'},
+    {time:'7-8 PM',task:'Post-workout meal + rest',tag:'break',tagColor:'#555'},
+    {time:'8-10 PM',task:'Light study / reading',tag:'study',tagColor:'#6366F1'},
+    {time:'10 PM-2 AM',task:'Deep work — CP contest / problem solving',tag:'cp',tagColor:'#F59E0B'},
+    {time:'2-3 AM',task:'Wind down / movie',tag:'leisure',tagColor:'#8B5CF6'},
+  ],
+  'DTU Weekday':[
+    {time:'8-9 AM',task:'Wake up, quick breakfast',tag:'routine',tagColor:'#10B981'},
+    {time:'9 AM-2 PM',task:'DTU classes (avg 5 hrs)',tag:'dtu',tagColor:'#6366F1'},
+    {time:'2-3 PM',task:'Lunch + rest',tag:'break',tagColor:'#555'},
+    {time:'3-5 PM',task:'DSA / CP — 1-2 problems',tag:'cp',tagColor:'#F59E0B'},
+    {time:'5-7 PM',task:'GYM',tag:'gym',tagColor:'#EF4444'},
+    {time:'7-8 PM',task:'Dinner + rest',tag:'break',tagColor:'#555'},
+    {time:'8-11 PM',task:'DTU academics / IIMB prep',tag:'study',tagColor:'#6366F1'},
+    {time:'11 PM-1 AM',task:'CP contest or LC grind',tag:'cp',tagColor:'#F59E0B'},
+    {time:'1-2 AM',task:'Sleep',tag:'routine',tagColor:'#555'},
+  ],
+  'DTU Weekend':[
+    {time:'9-10 AM',task:'Wake up, morning routine',tag:'routine',tagColor:'#10B981'},
+    {time:'10 AM-1 PM',task:'CP full session — 3+ problems',tag:'cp',tagColor:'#F59E0B'},
+    {time:'1-2 PM',task:'Lunch',tag:'break',tagColor:'#555'},
+    {time:'2-4 PM',task:'CAT prep / IIMB academics',tag:'study',tagColor:'#6366F1'},
+    {time:'4-6 PM',task:'GYM or sport (tennis/cricket)',tag:'gym',tagColor:'#EF4444'},
+    {time:'6-8 PM',task:'Free / social / recovery',tag:'leisure',tagColor:'#8B5CF6'},
+    {time:'8 PM',task:'LC Weekly Contest (Sundays)',tag:'cp',tagColor:'#F59E0B'},
+    {time:'9 PM-12 AM',task:'Deep study / projects',tag:'study',tagColor:'#6366F1'},
+  ],
+  'Exam Month':[
+    {time:'8 AM',task:'Wake up — no late starts',tag:'routine',tagColor:'#10B981'},
+    {time:'8-10 AM',task:'PYQs / revision',tag:'study',tagColor:'#6366F1'},
+    {time:'10 AM-1 PM',task:'Deep subject study',tag:'study',tagColor:'#6366F1'},
+    {time:'1-2 PM',task:'Lunch + 20 min nap max',tag:'break',tagColor:'#555'},
+    {time:'2-5 PM',task:'Subject revision continued',tag:'study',tagColor:'#6366F1'},
+    {time:'5-6 PM',task:'GYM — 3x/week minimum',tag:'gym',tagColor:'#EF4444'},
+    {time:'6-10 PM',task:'Formula sheets / quick revision',tag:'study',tagColor:'#6366F1'},
+    {time:'10 PM-12 AM',task:'Light CP — 1 easy problem',tag:'cp',tagColor:'#F59E0B'},
+    {time:'12-1 AM',task:'Sleep',tag:'routine',tagColor:'#555'},
+  ],
+  'CAT Crunch':[
+    {time:'8-9 AM',task:'Wake up, VARC reading',tag:'cat',tagColor:'#3B82F6'},
+    {time:'9-11 AM',task:'Full CAT mock (2hr)',tag:'cat',tagColor:'#3B82F6'},
+    {time:'11 AM-1 PM',task:'DTU classes if applicable',tag:'dtu',tagColor:'#6366F1'},
+    {time:'1-2 PM',task:'Lunch + mock analysis',tag:'break',tagColor:'#555'},
+    {time:'2-5 PM',task:'Mock analysis + weak area drill',tag:'cat',tagColor:'#3B82F6'},
+    {time:'5-7 PM',task:'GYM — stress relief, non-negotiable',tag:'gym',tagColor:'#EF4444'},
+    {time:'7-9 PM',task:'LRDI practice sets',tag:'cat',tagColor:'#3B82F6'},
+    {time:'9-11 PM',task:'Quant revision / shortcuts',tag:'cat',tagColor:'#3B82F6'},
+    {time:'11 PM-12 AM',task:'Light reading, wind down',tag:'leisure',tagColor:'#8B5CF6'},
+  ],
+};
+
+function buildTimetable() {
+  const tabs = document.getElementById('tt-tabs');
+  if(!tabs) return;
+  const phases = Object.keys(timetables);
+  tabs.innerHTML = phases.map((p,i)=>`<button class="tab-btn ${i===0?'active':''}" onclick="switchTT('${p}',this)">${p}</button>`).join('');
+  renderTT(phases[0]);
+}
+
+function switchTT(phase, el) {
+  document.querySelectorAll('#tt-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderTT(phase);
+}
+
+function renderTT(phase) {
+  const rows = timetables[phase];
+  document.getElementById('tt-content').innerHTML = rows.map(r=>`
+    <div class="tt-row">
+      <div class="tt-time">${r.time}</div>
+      <div class="tt-task">${r.task}</div>
+      <div style="padding:0.8rem 0 0.8rem 0.5rem;"><span class="tt-tag" style="background:${r.tagColor}18;color:${r.tagColor}">${r.tag}</span></div>
+    </div>`).join('');
+}
+buildTimetable();
+
+// ─── PLACEMENTS ────────────────────────────────────────────────────
+const companies = [
+  { name:'Jane Street', type:'Quant Trading', skills:'Probability, LP, Math', oa:'Quant/Algo', color:'var(--gold)' },
+  { name:'Jump Trading', type:'Quant Trading', skills:'Math, CS, CP', oa:'Quant/CP', color:'var(--gold)' },
+  { name:'Goldman Sachs', type:'IBD/Strats', skills:'Finance, DS, Python', oa:'Aptitude + Tech', color:'var(--blue)' },
+  { name:'Tower Research', type:'HFT', skills:'C++, Algo, Math', oa:'CP + Quant', color:'var(--gold)' },
+  { name:'Graviton Research', type:'Quant', skills:'Math, Stats, CP', oa:'Quant heavy', color:'var(--purple)' },
+  { name:'Quadeye', type:'Quant Trading', skills:'Math, CP, Python', oa:'CP + Math', color:'var(--purple)' },
+  { name:'Morgan Stanley', type:'Technology', skills:'DS&A, System Design', oa:'Tech standard', color:'var(--blue)' },
+  { name:'American Express', type:'Tech/Data', skills:'DS&A, ML basics', oa:'Tech standard', color:'var(--blue)' },
+  { name:'Microsoft', type:'SDE', skills:'DS&A, System Design', oa:'LC medium', color:'var(--blue)' },
+  { name:'Google', type:'SDE/Research', skills:'DS&A, Algorithms', oa:'LC hard', color:'var(--em)' },
+];
+
+function buildPlacements() {
+  const grid = document.getElementById('companies-grid');
+  if(!grid) return;
+  const statuses = S.get('company_status', {});
+  grid.innerHTML = companies.map(c=>`
+    <div class="co-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <div class="co-name" style="margin-bottom:0;">${c.name}</div>
+        <div style="font-size:0.6rem;color:${c.color};font-family:'JetBrains Mono',monospace;">${c.type}</div>
+      </div>
+      <div class="co-row"><span class="co-key">Skills</span><span style="font-size:0.72rem;color:var(--muted)">${c.skills}</span></div>
+      <div class="co-row"><span class="co-key">OA Type</span><span style="font-size:0.72rem;color:var(--muted)">${c.oa}</span></div>
+      <div class="co-row"><span class="co-key">Resume</span>
+        <select style="background:var(--card2);border:1px solid var(--border);color:var(--text);font-size:0.68rem;padding:2px 4px;border-radius:4px;" 
+          onchange="saveCompanyStatus('${c.name}','resume',this.value)">
+          <option ${(statuses[c.name]||{}).resume===''?'selected':''} value="">—</option>
+          <option ${(statuses[c.name]||{}).resume==='ready'?'selected':''} value="ready">Ready</option>
+          <option ${(statuses[c.name]||{}).resume==='wip'?'selected':''} value="wip">WIP</option>
+        </select>
+      </div>
+      <div class="co-row"><span class="co-key">OA Ready</span>
+        <select style="background:var(--card2);border:1px solid var(--border);color:var(--text);font-size:0.68rem;padding:2px 4px;border-radius:4px;"
+          onchange="saveCompanyStatus('${c.name}','oa',this.value)">
+          <option ${(statuses[c.name]||{}).oa===''?'selected':''} value="">—</option>
+          <option ${(statuses[c.name]||{}).oa==='yes'?'selected':''} value="yes">Yes</option>
+          <option ${(statuses[c.name]||{}).oa==='no'?'selected':''} value="no">No</option>
+        </select>
+      </div>
+    </div>`).join('');
+}
+buildPlacements();
+
+function saveCompanyStatus(company, field, val) {
+  const st = S.get('company_status', {});
+  if(!st[company]) st[company]={};
+  st[company][field] = val;
+  S.set('company_status', st);
+}
+
+// ─── ROADMAP ───────────────────────────────────────────────────────
+function buildRoadmap() {
+  const career = [
+    {year:'2025–29',event:'B.Tech ME (Automotive) — DTU Delhi',status:'current'},
+    {year:'2025–28',event:'BBA DBE — IIM Bangalore',status:'current'},
+    {year:'2029',event:'IES Attempt (post DTU)',status:'future'},
+    {year:'2029–31',event:'MBA — IIM A/B/C/L/M or FMS/ISB/XLRI',status:'future'},
+    {year:'2031–33',event:'UPSC CSE — max 3 attempts',status:'future'},
+    {year:'2032',event:'🎯 IPS — Indian Police Service',status:'future'},
+  ];
+  const exams = [
+    {year:'Jun 2026',event:'Summer CP + Weight cut — transformation begins',status:'current'},
+    {year:'Dec 2026',event:'Hard Launch — 74 kg · GOATUJJU unlocked',status:'current'},
+    {year:'Nov 2027',event:'CAT 2027 — 99+ percentile (trial)',status:'future'},
+    {year:'Feb 2028',event:'GATE 2028 — Rank <500',status:'future'},
+    {year:'Nov 2028',event:'CAT 2028 — 99.8+ percentile (main)',status:'future'},
+    {year:'Feb 2029',event:'GATE 2029 <200 + PGDBA <10',status:'future'},
+    {year:'2031–33',event:'UPSC CSE attempts → IPS',status:'future'},
+  ];
+
+  const ctl = document.getElementById('career-tl');
+  const etl = document.getElementById('exam-tl');
+  if(ctl) ctl.innerHTML = career.map(i=>`<div class="tl-item"><div class="tl-dot ${i.status}"></div><div class="tl-year">${i.year}</div><div class="tl-event">${i.event}</div></div>`).join('');
+  if(etl) etl.innerHTML = exams.map(i=>`<div class="tl-item"><div class="tl-dot ${i.status}"></div><div class="tl-year">${i.year}</div><div class="tl-event">${i.event}</div></div>`).join('');
+}
+buildRoadmap();
+
+// ─── VISION BOARD ──────────────────────────────────────────────────
+function buildVision() {
+  const items = [
+    {icon:'🏛️',label:'IIM Ahmedabad'},
+    {icon:'🚔',label:'IPS — 2032'},
+    {icon:'📈',label:'Jane Street'},
+    {icon:'💪',label:'74 kg Physique'},
+    {icon:'🎓',label:'DTU ME 2029'},
+    {icon:'🏆',label:'CAT 99.8+'},
+    {icon:'⚡',label:'CF 1500+'},
+    {icon:'🧠',label:'GATE Rank <200'},
+    {icon:'🌏',label:'FMS Delhi'},
+    {icon:'🔥',label:'Dec 20 Relaunch'},
+    {icon:'🎾',label:'Tennis Comeback'},
+    {icon:'⭐',label:'PGDBA Rank <10'},
+  ];
+  const grid = document.getElementById('vision-grid');
+  if(grid) grid.innerHTML = items.map(v=>`
+    <div class="vision-card">
+      <div style="font-size:2.5rem;">${v.icon}</div>
+      <div class="vision-label">${v.label}</div>
+    </div>`).join('');
+  renderQuotes();
+}
+buildVision();
+
+// ─── MODALS ────────────────────────────────────────────────────────
+function openModal(type) {
+  const overlay = document.getElementById('modal-overlay');
+  const body = document.getElementById('modal-body');
+  overlay.classList.add('open');
+
+  if(type === 'weight') {
+    const dateOpts = ['Jun 21','Jul 20','Aug 20','Sep 20','Oct 20','Nov 20','Dec 20'].map(d=>`<option value="${d}">${d} '26</option>`).join('');
+    body.innerHTML = `
+      <div class="modal-title">Log Weight</div>
+      <label class="inp-label">Checkpoint</label>
+      <select class="inp" id="m-w-date">${dateOpts}</select>
+      <label class="inp-label">Weight (kg)</label>
+      <input class="inp" id="m-w-val" type="number" step="0.1" placeholder="e.g. 85.2">
+      <button class="btn-em" onclick="submitWeight()">Save</button>
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>`;
+  } else if(type === 'cf') {
+    body.innerHTML = `
+      <div class="modal-title">Log CF Rating</div>
+      <label class="inp-label">Label (e.g. Jul '26)</label>
+      <input class="inp" id="m-cf-label" type="text" placeholder="Jul '26">
+      <label class="inp-label">Rating</label>
+      <input class="inp" id="m-cf-val" type="number" placeholder="e.g. 1050">
+      <button class="btn-em" onclick="submitCF()">Save</button>
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>`;
+  } else if(type === 'cgpa') {
+    body.innerHTML = `
+      <div class="modal-title">Log CGPA</div>
+      <label class="inp-label">Institution</label>
+      <select class="inp" id="m-cgpa-type"><option value="dtu">DTU</option><option value="iimb">IIMB</option></select>
+      <label class="inp-label">Semester / Trimester</label>
+      <input class="inp" id="m-cgpa-label" type="text" placeholder="e.g. DTU Sem2 / IIMB T3">
+      <label class="inp-label">CGPA / TGPA</label>
+      <input class="inp" id="m-cgpa-val" type="number" step="0.01" placeholder="e.g. 8.7">
+      <button class="btn-em" onclick="submitCGPA()">Save</button>
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>`;
+  } else if(type === 'cat') {
+    body.innerHTML = `
+      <div class="modal-title">Log CAT Mock</div>
+      <label class="inp-label">Overall Percentile</label>
+      <input class="inp" id="m-cat-pct" type="number" step="0.01" placeholder="e.g. 94.5">
+      <label class="inp-label">VARC Score</label>
+      <input class="inp" id="m-cat-varc" type="number" placeholder="e.g. 52">
+      <label class="inp-label">DILR Score</label>
+      <input class="inp" id="m-cat-dilr" type="number" placeholder="e.g. 48">
+      <label class="inp-label">QA Score</label>
+      <input class="inp" id="m-cat-qa" type="number" placeholder="e.g. 60">
+      <button class="btn-em" onclick="submitCAT()">Save</button>
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>`;
+  } else if(type === 'gym') {
+    body.innerHTML = `
+      <div class="modal-title">Log Gym Session</div>
+      <label class="inp-label">Sessions This Week</label>
+      <input class="inp" id="m-gym-days" type="number" min="0" max="7" placeholder="e.g. 5">
+      <button class="btn-em" onclick="submitGym()">Save</button>
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>`;
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function submitWeight() {
+  const date = document.getElementById('m-w-date').value;
+  const val = parseFloat(document.getElementById('m-w-val').value);
+  if(!val) return;
+  const entries = S.get('weight_entries', [{date:'Jun 21',val:87.8}]);
+  const order = ['Jun 21','Jul 20','Aug 20','Sep 20','Oct 20','Nov 20','Dec 20'];
+  const idx = entries.findIndex(e=>e.date===date);
+  if(idx>=0) entries[idx].val=val; else entries.push({date,val});
+  entries.sort((a,b)=>order.indexOf(a.date)-order.indexOf(b.date));
+  S.set('weight_entries', entries);
+  chartsBuilt.fitness = false;
+  closeModal();
+  updateGoatScore();
+  alert('Weight logged ✓');
+}
+
+function submitCF() {
+  const label = document.getElementById('m-cf-label').value.trim();
+  const val = parseInt(document.getElementById('m-cf-val').value);
+  if(!label || !val) return;
+  const entries = S.get('cf_entries', []);
+  const idx = entries.findIndex(e=>e.label===label);
+  if(idx>=0) entries[idx].val=val; else entries.push({label,val});
+  S.set('cf_entries', entries);
+  chartsBuilt = {};
+  closeModal();
+  updateGoatScore();
+  alert('CF Rating logged ✓');
+}
+
+function submitCGPA() {
+  const type = document.getElementById('m-cgpa-type').value;
+  const label = document.getElementById('m-cgpa-label').value.trim();
+  const val = parseFloat(document.getElementById('m-cgpa-val').value);
+  if(!label || !val) return;
+  const entries = S.get('cgpa_entries', [{label:'DTU Sem1',val:9.0,type:'dtu'},{label:'IIMB T2',val:8.4,type:'iimb'}]);
+  const idx = entries.findIndex(e=>e.label===label);
+  if(idx>=0) entries[idx]={label,val,type}; else entries.push({label,val,type});
+  S.set('cgpa_entries', entries);
+  chartsBuilt = {};
+  closeModal();
+  alert('CGPA logged ✓');
+}
+
+function submitCAT() {
+  const pct = parseFloat(document.getElementById('m-cat-pct').value);
+  const varc = document.getElementById('m-cat-varc').value;
+  const dilr = document.getElementById('m-cat-dilr').value;
+  const qa = document.getElementById('m-cat-qa').value;
+  if(!pct) return;
+  const mocks = S.get('cat_mocks', []);
+  mocks.push({pct,varc,dilr,qa,date:new Date().toLocaleDateString('en-IN')});
+  S.set('cat_mocks', mocks);
+  chartsBuilt.mba = false;
+  closeModal();
+  alert('Mock logged ✓');
+}
+
+function submitGym() {
+  const days = parseInt(document.getElementById('m-gym-days').value)||0;
+  S.set('gym_week', days);
+  chartsBuilt.fitness = false;
+  closeModal();
+  updateGoatScore();
+  alert('Gym logged ✓');
+}
+
+// ─── SAVE GOAT SCORE DAILY ─────────────────────────────────────────
+function saveGoatHistory() {
+  const { score } = calcGoatScore();
+  const today = new Date().toLocaleDateString('en-IN',{month:'short',day:'numeric'});
+  const history = S.get('goat_history', []);
+  const last = history[history.length-1];
+  if(!last || last.date !== today) { history.push({date:today,score}); S.set('goat_history', history); }
+}
+saveGoatHistory();
+
+// ─── DATE ──────────────────────────────────────────────────────────
+document.getElementById('journal-today-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// Final init
+updateGoatScore();
+</script>
+</body>
+</html>
