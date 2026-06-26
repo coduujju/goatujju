@@ -367,6 +367,7 @@ textarea.je-input:focus{border-color:var(--em);}
 
   <!-- TODAY LOG -->
   <div class="sdiv"><span class="sdiv-label">Log Today</span><div class="sdiv-line"></div></div>
+
   <div class="grid4" style="margin-bottom:1.5rem;" id="today-cards"></div>
 
   <!-- QUICK STATS -->
@@ -444,17 +445,45 @@ textarea.je-input:focus{border-color:var(--em);}
 
   <div class="grid2">
     <div class="card">
-      <div class="stat-label" style="margin-bottom:0.75rem;">Gym This Week</div>
-      <div style="display:flex;gap:0.5rem;">
-        <div id="gym-week-dots" style="display:flex;gap:0.4rem;"></div>
+      <div class="stat-label" style="margin-bottom:0.75rem;">💪 Gym This Week</div>
+      <div id="gym-week-dots" style="display:flex;gap:0.4rem;flex-wrap:wrap;"></div>
+      <div style="margin-top:0.75rem;font-size:0.72rem;color:var(--muted);">Target: 5x/week · 20/20 pts</div>
+      <div style="margin-top:1rem;">
+        <div class="stat-label" style="margin-bottom:0.5rem;">🏃 Cardio Today</div>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <button onclick="setCardio(0)" id="c-btn-0" class="chart-btn" style="opacity:0.4;">&lt;10 min · 0pts</button>
+          <button onclick="setCardio(15)" id="c-btn-15" class="chart-btn" style="opacity:0.4;">10-20 min · 10pts</button>
+          <button onclick="setCardio(25)" id="c-btn-25" class="chart-btn" style="opacity:0.4;">20-30 min · 15pts</button>
+          <button onclick="setCardio(35)" id="c-btn-35" class="chart-btn" style="opacity:0.4;">&gt;30 min · 25pts</button>
+        </div>
+        <div style="margin-top:0.5rem;font-size:0.72rem;color:var(--muted);">Or enter exact: <input id="cardio-direct-inp" type="number" placeholder="mins" class="inp" style="width:80px;display:inline-block;padding:0.25rem 0.5rem;font-size:0.78rem;" oninput="saveCardioMins(this.value)"></div>
       </div>
-      <div style="margin-top:1rem;font-size:0.78rem;color:var(--muted);">Target: 5x per week</div>
     </div>
     <div class="card">
-      <div class="stat-label" style="margin-bottom:0.75rem;">Daily Deficit</div>
-      <div class="stat-val" style="font-size:1.4rem;">~1,000</div>
-      <div class="stat-sub">kcal/day target</div>
-      <button class="chart-btn" style="margin-top:0.75rem;" onclick="openModal('gym')">Log Gym Session</button>
+      <div class="stat-label" style="margin-bottom:0.75rem;">Calorie Deficit Log</div>
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
+        <input class="inp" id="deficit-date-inp" type="date" style="flex:1;font-size:0.78rem;padding:0.45rem 0.6rem;">
+        <input class="inp" id="deficit-val-inp" type="number" placeholder="kcal" style="width:90px;font-size:0.78rem;padding:0.45rem 0.6rem;">
+        <button class="chart-btn" onclick="logDeficit()" style="white-space:nowrap;">+ Add</button>
+      </div>
+      <div style="display:flex;gap:1.5rem;margin-bottom:0.75rem;flex-wrap:wrap;">
+        <div>
+          <div class="stat-label">Total Deficit</div>
+          <div class="stat-val" id="total-deficit-val" style="font-size:1.4rem;color:var(--em);">0</div>
+          <div class="stat-sub">kcal cumulative</div>
+        </div>
+        <div>
+          <div class="stat-label">Fat Lost (~)</div>
+          <div class="stat-val" id="fat-lost-val" style="font-size:1.4rem;color:var(--gold);">0.0</div>
+          <div class="stat-sub">kg (7700 kcal/kg)</div>
+        </div>
+        <div>
+          <div class="stat-label">Days Logged</div>
+          <div class="stat-val" id="deficit-days-val" style="font-size:1.4rem;">0</div>
+          <div class="stat-sub">entries</div>
+        </div>
+      </div>
+      <div id="deficit-recent" style="max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:0.25rem;"></div>
     </div>
   </div>
 </div>
@@ -825,43 +854,53 @@ buildGoals();
 // ─── GOAT SCORE ────────────────────────────────────────────────────
 function calcGoatScore() {
   const today = S.get('today', {});
-  const habits = S.get('habits_today', {});
   const weight = S.get('weight_entries', [{date:'Jun 21',val:87.8}]);
   const cf = S.get('cf_entries', [{label:"Jun '26", val:940}]);
 
   let score = 0, breakdown = [];
 
-  // Gym (25 pts)
-  const gymDays = S.get('gym_week', 0);
-  const gymScore = Math.round((Math.min(gymDays,5)/5)*25);
+  // Gym (20 pts)
+  const gymDays = S.get('gym_days', []).length;
+  const gymScore = Math.round((Math.min(gymDays,5)/5)*20);
   score += gymScore;
-  breakdown.push(`Gym: ${gymDays}/5 sessions → ${gymScore}/25`);
+  breakdown.push(`Gym: ${gymDays}/5 sessions → ${gymScore}/20`);
 
-  // Study hours (20 pts)
+  // Cardio (25 pts)
+  const cardioMins = today.cardio_mins || 0;
+  const cardioScore = cardioMins >= 30 ? 15 : cardioMins >= 20 ? 10 : cardioMins >= 10 ? 5 : 0;
+  score += cardioScore;
+  breakdown.push(`Cardio: ${cardioMins} mins → ${cardioScore}/15`);
+
+  // Study hours (10 pts)
   const studyHrs = today.study_hours || 0;
-  const studyScore = Math.round((Math.min(studyHrs,8)/8)*20);
+  const studyScore = Math.round((Math.min(studyHrs,8)/8)*10);
   score += studyScore;
-  breakdown.push(`Study: ${studyHrs}h → ${studyScore}/20`);
+  breakdown.push(`Study: ${studyHrs}h → ${studyScore}/10`);
 
-  // DSA / CF (20 pts)
-  const cfCurrent = cf.length ? cf[cf.length-1].val : 940;
-  const cfProgress = Math.min((cfCurrent - 800) / (1500 - 800), 1);
-  const cpScore = Math.round(cfProgress * 20);
-  score += cpScore;
-  breakdown.push(`CP (CF ${cfCurrent}): ${cpScore}/20`);
+  // Problems solved (20 pts) — 2.5 pts each, max 8 problems
+  const probs = today.problems_solved || 0;
+  const probScore = Math.min(Math.round(probs * 2.5), 20);
+  score += probScore;
+  breakdown.push(`Problems: ${probs} solved → ${probScore}/20`);
 
-  // Weight progress (20 pts)
+  // Calorie deficit (20 pts) — 1000 kcal = 20, 900 = 18, every 100 kcal = 2 pts
+  const deficit = today.deficit || 0;
+  const deficitScore = Math.min(Math.round((deficit / 100) * 2), 20);
+  score += deficitScore;
+  breakdown.push(`Deficit: ${deficit} kcal → ${deficitScore}/20`);
+
+  // Weight progress (10 pts)
   const curW = weight.length ? weight[weight.length-1].val : 87.8;
   const wProgress = Math.min((87.8 - curW) / (87.8 - 74), 1);
-  const wScore = Math.round(wProgress * 20);
+  const wScore = Math.round(wProgress * 10);
   score += wScore;
-  breakdown.push(`Weight (${curW}kg): ${wScore}/20`);
+  breakdown.push(`Weight (${curW}kg): ${wScore}/10`);
 
-  // Sleep & consistency (15 pts)
+  // Sleep (5 pts)
   const sleep = today.sleep || 0;
-  const sleepScore = sleep >= 7 ? 15 : sleep >= 6 ? 10 : sleep >= 5 ? 5 : 0;
+  const sleepScore = sleep >= 7 ? 5 : sleep >= 6 ? 3 : sleep >= 5 ? 1 : 0;
   score += sleepScore;
-  breakdown.push(`Sleep (${sleep}h): ${sleepScore}/15`);
+  breakdown.push(`Sleep (${sleep}h): ${sleepScore}/5`);
 
   return { score: Math.round(score), breakdown };
 }
@@ -897,10 +936,11 @@ function buildDashboard() {
   document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
   const todayFields = [
-    { id:'study_hours', label:'Study Hours', icon:'📚', unit:'hrs', type:'number', max:16, placeholder:'0' },
-    { id:'problems_solved', label:'Problems Today', icon:'⚡', unit:'probs', type:'number', max:20, placeholder:'0' },
-    { id:'calories', label:'Calories', icon:'🔥', unit:'kcal', type:'number', max:4000, placeholder:'1800' },
-    { id:'sleep', label:'Sleep', icon:'🌙', unit:'hrs', type:'number', max:12, placeholder:'7' },
+    { id:'study_hours', label:'Study Hours', icon:'📚', unit:'hrs (max 8 = 15pts)', type:'number', max:16, placeholder:'0' },
+    { id:'problems_solved', label:'Problems Today', icon:'⚡', unit:'probs (2.5pts each, max 20)', type:'number', max:20, placeholder:'0' },
+    { id:'deficit', label:'Calorie Deficit', icon:'🔥', unit:'kcal (1000 = 20pts)', type:'number', max:3000, placeholder:'0' },
+    { id:'cardio_mins', label:'Cardio', icon:'🏃', unit:'mins (<10=0, 10-20=10, 20-30=15, 30+=25)', type:'number', max:120, placeholder:'0' },
+    { id:'sleep', label:'Sleep', icon:'🌙', unit:'hrs (7+ = 10pts)', type:'number', max:12, placeholder:'7' },
   ];
 
   document.getElementById('today-cards').innerHTML = todayFields.map(f=>`
@@ -1017,6 +1057,7 @@ function initFitnessPage() {
   document.getElementById('fit-bmi').textContent = bmi;
 
   renderChips('weight_entries','weight-chips','val','#EF4444');
+  initDeficitTracker();
 
   // Gym week dots
   const gymDays = S.get('gym_week', 0);
@@ -1028,12 +1069,33 @@ function initFitnessPage() {
     </div>`).join('');
 }
 
+function renderGymDots() {
+  const gymDays = S.get('gym_days', []);
+  const dots = document.getElementById('gym-week-dots');
+  if(!dots) return;
+  dots.innerHTML = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i) => `
+    <div style="text-align:center;cursor:pointer;" onclick="toggleGymDay(${i})">
+      <div style="width:38px;height:38px;border-radius:8px;
+        background:${gymDays.includes(i)?'var(--em)':'var(--border2)'};
+        border:1px solid ${gymDays.includes(i)?'var(--em)':'var(--border)'};
+        margin-bottom:4px;display:flex;align-items:center;justify-content:center;
+        font-size:0.75rem;font-weight:600;
+        color:${gymDays.includes(i)?'#000':'var(--muted)'};
+        transition:all 0.15s;">
+        ${gymDays.includes(i)?'✓':''}
+      </div>
+      <div style="font-size:0.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace;">${d}</div>
+    </div>`).join('');
+}
+
 function toggleGymDay(i) {
-  let gd = S.get('gym_week', 0);
-  gd = gd === i+1 ? i : i+1;
-  S.set('gym_week', i+1);
-  chartsBuilt.fitness = false;
-  initFitnessPage();
+  let gymDays = S.get('gym_days', []);
+  if(gymDays.includes(i)) gymDays = gymDays.filter(d => d !== i);
+  else gymDays.push(i);
+  S.set('gym_days', gymDays);
+  // also update gym_week count for GOAT score
+  S.set('gym_week', gymDays.length);
+  renderGymDots();
   updateGoatScore();
 }
 
@@ -1662,6 +1724,96 @@ function submitGym() {
   closeModal();
   updateGoatScore();
   alert('Gym logged ✓');
+}
+
+
+// ─── DEFICIT TRACKER ───────────────────────────────────────────────
+function initDeficitTracker() {
+  const today = new Date().toISOString().split('T')[0];
+  const inp = document.getElementById('deficit-date-inp');
+  if(inp) inp.value = today;
+  renderDeficit();
+}
+
+function logDeficit() {
+  const date = document.getElementById('deficit-date-inp').value;
+  const val = parseInt(document.getElementById('deficit-val-inp').value);
+  if(!date || !val || val <= 0) { alert('Enter a valid date and deficit!'); return; }
+  const entries = S.get('deficit_log', []);
+  const idx = entries.findIndex(e => e.date === date);
+  if(idx >= 0) entries[idx].val = val;
+  else entries.push({ date, val });
+  entries.sort((a,b) => a.date.localeCompare(b.date));
+  S.set('deficit_log', entries);
+  document.getElementById('deficit-val-inp').value = '';
+  renderDeficit();
+}
+
+function deleteDeficit(date) {
+  const entries = S.get('deficit_log', []).filter(e => e.date !== date);
+  S.set('deficit_log', entries);
+  renderDeficit();
+}
+
+function renderDeficit() {
+  const entries = S.get('deficit_log', []);
+  const total = entries.reduce((sum, e) => sum + e.val, 0);
+  const fatLost = (total / 7700).toFixed(2);
+  const tv = document.getElementById('total-deficit-val');
+  const fv = document.getElementById('fat-lost-val');
+  const dv = document.getElementById('deficit-days-val');
+  const rc = document.getElementById('deficit-recent');
+  if(tv) tv.textContent = total.toLocaleString();
+  if(fv) fv.textContent = fatLost;
+  if(dv) dv.textContent = entries.length;
+  if(rc) rc.innerHTML = [...entries].reverse().slice(0, 10).map(e => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0.3rem 0.5rem;background:var(--card2);border-radius:5px;font-size:0.75rem;">
+      <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;">${e.date}</span>
+      <span style="color:var(--em);font-weight:600;">${e.val.toLocaleString()} kcal</span>
+      <span onclick="deleteDeficit('${e.date}')" style="cursor:pointer;color:var(--muted2);font-size:10px;padding:0 4px;">×</span>
+    </div>`).join('');
+}
+
+
+// ─── DASHBOARD GYM DOTS ────────────────────────────────────────────
+function buildDashGym() {
+  const days = ['M','T','W','T','F','S','S'];
+  const gymDays = S.get('gym_week', 0);
+  const el = document.getElementById('dash-gym-dots');
+  const sc = document.getElementById('dash-gym-score');
+  if(!el) return;
+  el.innerHTML = days.map((d,i) => `
+    <div onclick="toggleDashGym(${i})" style="text-align:center;cursor:pointer;">
+      <div style="width:36px;height:36px;border-radius:8px;background:${i<gymDays?'var(--em)':'var(--border2)'};display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600;color:${i<gymDays?'#000':'var(--muted)'};transition:all 0.15s;border:1px solid ${i<gymDays?'var(--em)':'var(--border)'};">${d}</div>
+      <div style="font-size:0.55rem;color:var(--muted);margin-top:3px;font-family:'JetBrains Mono',monospace;">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]}</div>
+    </div>`).join('');
+  const pts = Math.round((Math.min(gymDays,5)/5)*25);
+  if(sc) sc.textContent = pts;
+}
+
+function toggleDashGym(i) {
+  const current = S.get('gym_week', 0);
+  const newVal = (current === i+1) ? i : i+1;
+  S.set('gym_week', newVal);
+  buildDashGym();
+  updateGoatScore();
+}
+
+
+function setCardio(mins) {
+  saveTodayField('cardio_mins', mins);
+  // highlight active button
+  [0,15,25,35].forEach(v => {
+    const b = document.getElementById('c-btn-'+v);
+    if(b) b.style.opacity = v===mins ? '1' : '0.4';
+  });
+  const inp = document.getElementById('cardio-direct-inp');
+  if(inp) inp.value = mins;
+}
+
+function saveCardioMins(val) {
+  const mins = parseInt(val)||0;
+  saveTodayField('cardio_mins', mins);
 }
 
 // ─── SAVE GOAT SCORE DAILY ─────────────────────────────────────────
